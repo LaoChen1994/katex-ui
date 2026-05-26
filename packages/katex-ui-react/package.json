@@ -1,0 +1,36 @@
+{
+  "name": "katex-ui-react",
+  "version": "0.0.0",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "katex-ui": "workspace:*"
+  },
+  "peerDependencies": {
+    "pdyform-core": "^1.1.1",
+    "pdyform-react": "^1.1.2",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "pdyform-core": "^1.1.1",
+    "pdyform-react": "^1.1.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}
