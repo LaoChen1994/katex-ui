@@ -17,7 +17,7 @@ export const toPdyformSchema = (schema: FormulaSchema): FormSchema => ({
     defaultValue: field.defaultValue,
     options: field.options,
     componentProps:
-      field.valueType === 'number'
+      field.valueType === 'number' && !field.options
         ? {
             inputMode: 'decimal',
           }
