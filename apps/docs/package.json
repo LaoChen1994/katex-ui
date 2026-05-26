@@ -1,0 +1,17 @@
+{
+  "name": "docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vitepress build src",
+    "dev": "vitepress dev src --host 0.0.0.0",
+    "lint": "eslint .",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "vitepress": "^1.5.0",
+    "vitest": "^2.1.8"
+  }
+}
