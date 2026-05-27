@@ -4,6 +4,8 @@ Build formula-powered forms without turning your product into a spreadsheet.
 
 `katex-ui` turns expressions like `price * count * discount` into a stable form schema, renders that schema in React through `pdyform-react`, and calculates results as users type. The core package stays framework-free, so formula parsing, validation, schema normalization, batching, and result formatting can run anywhere.
 
+[Documentation](https://laochen1994.github.io/katex-ui/) · [GitHub](https://github.com/LaoChen1994/katex-ui)
+
 ```tsx
 import { createFormulaSchema } from 'katex-ui/schema';
 import { FormulaForm } from 'katex-ui-react';
@@ -315,6 +317,16 @@ Run local apps:
 pnpm --filter demo-react dev
 pnpm --filter docs dev
 ```
+
+## Documentation Site
+
+The docs are deployed with GitHub Pages:
+
+```txt
+https://laochen1994.github.io/katex-ui/
+```
+
+Deployment is handled by `.github/workflows/pages.yml`. The workflow builds `apps/docs` with VitePress and uploads `apps/docs/src/.vitepress/dist` as the Pages artifact. It runs on pushes to `main` and can also be started manually from GitHub Actions.
 
 ## Release Flow
 

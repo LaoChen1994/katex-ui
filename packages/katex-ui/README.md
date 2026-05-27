@@ -4,6 +4,8 @@ Framework-free formula and schema utilities for formula-driven forms.
 
 Install this package when you want formula parsing, validation, calculation, result formatting, schema generation, or batch calculation without installing React, Vue, or any form renderer.
 
+[Documentation](https://laochen1994.github.io/katex-ui/) · [GitHub](https://github.com/LaoChen1994/katex-ui)
+
 ```bash
 pnpm add katex-ui
 ```

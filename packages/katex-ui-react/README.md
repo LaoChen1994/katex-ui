@@ -4,6 +4,8 @@ React renderer for `katex-ui` formula schemas, powered by `pdyform-react`.
 
 Use this package when you want to turn a formula into a live React form with real-time calculation results.
 
+[Documentation](https://laochen1994.github.io/katex-ui/) · [GitHub](https://github.com/LaoChen1994/katex-ui)
+
 ```bash
 pnpm add katex-ui katex-ui-react pdyform-core pdyform-react react react-dom
 ```
