@@ -1,5 +1,11 @@
 # katex-ui
 
+## 0.3.1
+
+### Patch Changes
+
+- 303deac: Improve `katex-ui/parser` with more LaTeX function commands and stricter unsupported command handling.
+
 ## 0.3.0
 
 ### Minor Changes
