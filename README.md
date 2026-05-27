@@ -221,7 +221,7 @@ calculateLatexFormula('\\frac{price \\times count}{discount}', {
 // { value: 50, errors: [] }
 ```
 
-This is a conversion layer, not a full LaTeX engine. It supports common calculation syntax such as `\frac`, `\sqrt`, `\times`, `\cdot`, `\div`, braced powers, and basic function commands like `\min`, `\max`, and `\round`.
+This is a conversion layer, not a full LaTeX engine. It supports common calculation syntax such as `\frac`, `\sqrt`, `\times`, `\cdot`, `\div`, `\left...\right`, braced powers, and function commands like `\min`, `\max`, `\round`, `\sin`, `\cos`, `\tan`, `\log`, and `\abs`. Unsupported LaTeX commands return a parse error instead of being treated as variables.
 
 ## React API
 

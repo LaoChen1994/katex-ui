@@ -26,13 +26,26 @@ export type ParsedLatexFormula = {
 };
 
 const commandMap: Record<string, string> = {
+  '\\abs': 'abs',
   '\\cdot': '*',
+  '\\cos': 'cos',
   '\\div': '/',
   '\\left': '',
+  '\\log': 'log',
   '\\max': 'max',
   '\\min': 'min',
+  '\\operatorname{abs}': 'abs',
+  '\\operatorname{cos}': 'cos',
+  '\\operatorname{log}': 'log',
+  '\\operatorname{max}': 'max',
+  '\\operatorname{min}': 'min',
+  '\\operatorname{round}': 'round',
+  '\\operatorname{sin}': 'sin',
+  '\\operatorname{tan}': 'tan',
   '\\right': '',
   '\\round': 'round',
+  '\\sin': 'sin',
+  '\\tan': 'tan',
   '\\times': '*',
 };
 
@@ -190,6 +203,10 @@ export const latexToExpression = (source: string): string => {
 
   for (const [command, replacement] of Object.entries(commandMap)) {
     expression = expression.split(command).join(replacement);
+  }
+
+  if (/\\[a-zA-Z]+/.test(expression)) {
+    return '';
   }
 
   return expression

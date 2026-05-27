@@ -39,6 +39,27 @@ describe('latex parser utilities', () => {
     );
   });
 
+  it('converts latex function commands with braced arguments', () => {
+    expect(latexToExpression('\\sin{x} + \\cos{y} + \\tan{z}')).toBe(
+      'sin(x) + cos(y) + tan(z)',
+    );
+    expect(latexToExpression('\\log{price} + \\abs{discount}')).toBe(
+      'log(price) + abs(discount)',
+    );
+  });
+
+  it('converts operatorname functions', () => {
+    expect(
+      latexToExpression('\\operatorname{round}(price) + \\operatorname{max}(a, b)'),
+    ).toBe('round(price) + max(a, b)');
+  });
+
+  it('removes latex sizing commands without changing grouping', () => {
+    expect(latexToExpression('\\left(price + tax\\right) \\times count')).toBe(
+      '(price + tax) * count',
+    );
+  });
+
   it('parses latex formulas into expressions and variables', () => {
     expect(parseLatexFormula('\\frac{price \\times count}{discount}')).toEqual({
       source: '\\frac{price \\times count}{discount}',
@@ -65,6 +86,20 @@ describe('latex parser utilities', () => {
   it('returns invalid latex errors for broken groups', () => {
     expect(parseLatexFormula('\\frac{price}{count')).toEqual({
       source: '\\frac{price}{count',
+      expression: '',
+      variables: [],
+      errors: [
+        {
+          code: 'INVALID_LATEX',
+          message: 'LaTeX formula is invalid or unsupported.',
+        },
+      ],
+    });
+  });
+
+  it('returns invalid latex errors for unsupported commands', () => {
+    expect(parseLatexFormula('\\foo{price} + count')).toEqual({
+      source: '\\foo{price} + count',
       expression: '',
       variables: [],
       errors: [
