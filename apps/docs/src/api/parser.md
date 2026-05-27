@@ -21,8 +21,18 @@ latexToExpression('\\frac{price \\times count}{discount}');
 | `\frac{a}{b}` | `((a) / (b))` |
 | `\sqrt{x}` | `sqrt(x)` |
 | `x^{2}` | `x^(2)` |
+| `\left(a + b\right)` | `(a + b)` |
 | `\min(a, b)` | `min(a, b)` |
 | `\max(a, b)` | `max(a, b)` |
+| `\round(x)` | `round(x)` |
+| `\sin{x}` | `sin(x)` |
+| `\cos{x}` | `cos(x)` |
+| `\tan{x}` | `tan(x)` |
+| `\log{x}` | `log(x)` |
+| `\abs{x}` | `abs(x)` |
+| `\operatorname{round}(x)` | `round(x)` |
+
+不支持的 LaTeX 命令会返回 `INVALID_LATEX`，不会被静默转换成变量名。这个策略可以避免用户误以为复杂排版语法已经进入计算链路。
 
 ## `parseLatexFormula(source)`
 

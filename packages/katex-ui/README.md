@@ -104,7 +104,7 @@ calculateLatexFormula('\\frac{price \\times count}{discount}', {
 // { value: 50, errors: [] }
 ```
 
-The parser is a focused conversion layer for common calculation formulas. It is not a full LaTeX engine.
+The parser is a focused conversion layer for common calculation formulas. It supports fractions, square roots, multiplication/division commands, braced powers, `\left...\right`, and common function commands such as `\min`, `\max`, `\round`, `\sin`, `\cos`, `\tan`, `\log`, and `\abs`. It is not a full LaTeX engine, and unsupported commands return parser errors.
 
 ## Result Formatting
 
