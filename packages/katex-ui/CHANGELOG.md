@@ -1,5 +1,11 @@
 # katex-ui
 
+## 0.3.0
+
+### Minor Changes
+
+- bd88d74: Add the `katex-ui/parser` entry for converting a supported LaTeX formula subset into katex-ui expressions.
+
 ## 0.2.0
 
 ### Minor Changes
