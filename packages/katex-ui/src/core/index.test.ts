@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { calculateFormula, extractVariables, validateFormula } from './index.js';
+import {
+  calculateFormula,
+  calculateFormulaBatch,
+  createFormulaRunner,
+  extractVariables,
+  formatFormulaValue,
+  getFormulaSummary,
+  validateFormula,
+} from './index.js';
 
 describe('core formula utilities', () => {
   it('extracts variables from a formula', () => {
@@ -126,6 +134,145 @@ describe('core formula utilities', () => {
   it('treats empty strings as missing values', () => {
     expect(calculateFormula('price * count', { price: 10, count: '' })).toEqual({
       value: null,
+      errors: [
+        {
+          code: 'MISSING_VARIABLE',
+          message: 'Variable "count" is required.',
+          variable: 'count',
+        },
+      ],
+    });
+  });
+
+  it('formats floating point values for display', () => {
+    expect(formatFormulaValue(237.60000000000002, { precision: 12 })).toBe(
+      '237.6',
+    );
+    expect(
+      formatFormulaValue(1234.5, {
+        locale: 'en-US',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }),
+    ).toBe('1,234.50');
+    expect(formatFormulaValue(null, { fallback: 'N/A' })).toBe('N/A');
+  });
+
+  it('summarizes formula validity and variables', () => {
+    expect(getFormulaSummary('price * count')).toEqual({
+      expression: 'price * count',
+      variables: ['price', 'count'],
+      valid: true,
+      errors: [],
+    });
+
+    expect(getFormulaSummary('price *')).toEqual({
+      expression: 'price *',
+      variables: [],
+      valid: false,
+      errors: [
+        {
+          code: 'INVALID_EXPRESSION',
+          message: 'unexpected TEOF: EOF',
+        },
+      ],
+    });
+  });
+
+  it('creates a reusable formula runner', () => {
+    const runner = createFormulaRunner('price * count');
+
+    expect(runner.expression).toBe('price * count');
+    expect(runner.variables).toEqual(['price', 'count']);
+    expect(runner.calculate({ price: 12, count: 4 })).toEqual({
+      value: 48,
+      errors: [],
+    });
+  });
+
+  it('keeps invalid formula runners safe to call', () => {
+    const runner = createFormulaRunner('price *');
+
+    expect(runner.variables).toEqual([]);
+    expect(runner.calculate({ price: 12 }).value).toBeNull();
+    expect(runner.calculate({ price: 12 }).errors[0]?.code).toBe(
+      'INVALID_EXPRESSION',
+    );
+  });
+
+  it('calculates formula batches with derived values', () => {
+    expect(
+      calculateFormulaBatch(
+        [
+          { name: 'subtotal', expression: 'price * count' },
+          { name: 'tax', expression: 'subtotal * taxRate' },
+          { name: 'total', expression: 'subtotal + tax' },
+        ],
+        {
+          price: 100,
+          count: 2,
+          taxRate: 0.06,
+        },
+      ),
+    ).toEqual({
+      values: {
+        price: 100,
+        count: 2,
+        taxRate: 0.06,
+        subtotal: 200,
+        tax: 12,
+        total: 212,
+      },
+      results: {
+        subtotal: {
+          value: 200,
+          errors: [],
+        },
+        tax: {
+          value: 12,
+          errors: [],
+        },
+        total: {
+          value: 212,
+          errors: [],
+        },
+      },
+      errors: [],
+    });
+  });
+
+  it('keeps batch errors and continues with later definitions', () => {
+    expect(
+      calculateFormulaBatch(
+        [
+          { name: 'subtotal', expression: 'price * count' },
+          { name: 'fee', expression: 'price + 10' },
+        ],
+        {
+          price: 100,
+        },
+      ),
+    ).toEqual({
+      values: {
+        price: 100,
+        fee: 110,
+      },
+      results: {
+        subtotal: {
+          value: null,
+          errors: [
+            {
+              code: 'MISSING_VARIABLE',
+              message: 'Variable "count" is required.',
+              variable: 'count',
+            },
+          ],
+        },
+        fee: {
+          value: 110,
+          errors: [],
+        },
+      },
       errors: [
         {
           code: 'MISSING_VARIABLE',

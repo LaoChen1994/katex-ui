@@ -12,14 +12,25 @@ pnpm add katex-ui katex-ui-react pdyform-core pdyform-react
 import { createFormulaSchema } from 'katex-ui/schema';
 import { FormulaForm } from 'katex-ui-react';
 
-const schema = createFormulaSchema('price * count', [
-  { name: 'price', label: '单价', defaultValue: 10 },
-  { name: 'count', label: '数量', defaultValue: 3 },
-]);
+const schema = createFormulaSchema({
+  expression: 'price * count',
+  fields: [
+    { name: 'price', label: '单价', defaultValue: 10, min: 0 },
+    { name: 'count', label: '数量', defaultValue: 3, min: 1 },
+  ],
+  result: {
+    label: '总价',
+    precision: 12,
+  },
+});
 
 export const Demo = () => (
   <FormulaForm
     schema={schema}
+    showResult
+    onValuesChange={(values) => {
+      console.log(values);
+    }}
     onResult={(result) => {
       console.log(result.value);
     }}
