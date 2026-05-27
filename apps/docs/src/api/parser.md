@@ -53,3 +53,37 @@ calculateLatexFormula('\\frac{price \\times count}{discount}', {
   discount: 4,
 });
 ```
+
+## `createLatexFormulaSchema(options)`
+
+把 LaTeX 输入转换成 `FormulaSchema`，可以直接交给 React 适配器渲染。
+
+```ts
+createLatexFormulaSchema({
+  source: '\\frac{price \\times count}{discount}',
+  fields: [
+    { name: 'price', label: '单价', defaultValue: 100 },
+    { name: 'count', label: '数量', defaultValue: 2 },
+    { name: 'discount', label: '折扣因子', defaultValue: 4 },
+  ],
+  result: {
+    label: '结果',
+  },
+});
+```
+
+## `createLatexFormulaCalculator(options)`
+
+返回解析结果、schema 和可复用的 `calculate(values)`。
+
+```ts
+const calculator = createLatexFormulaCalculator({
+  source: '\\frac{price \\times count}{discount}',
+});
+
+calculator.expression;
+// '((price * count) / (discount))'
+
+calculator.calculate({ price: 100, count: 2, discount: 4 });
+// { value: 50, errors: [] }
+```

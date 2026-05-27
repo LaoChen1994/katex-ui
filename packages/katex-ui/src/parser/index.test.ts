@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   calculateLatexFormula,
+  createLatexFormulaCalculator,
+  createLatexFormulaSchema,
   latexToExpression,
   parseLatexFormula,
 } from './index.js';
@@ -137,6 +139,108 @@ describe('latex parser utilities', () => {
           code: 'MISSING_VARIABLE',
           message: 'Variable "discount" is required.',
           variable: 'discount',
+        },
+      ],
+    });
+  });
+
+  it('creates formula schemas from latex formulas', () => {
+    expect(
+      createLatexFormulaSchema({
+        source: '\\frac{price \\times count}{discount}',
+        fields: [
+          {
+            name: 'price',
+            label: '单价',
+            defaultValue: 100,
+            min: 0,
+          },
+        ],
+        result: {
+          label: '结果',
+          precision: 12,
+        },
+      }),
+    ).toEqual({
+      expression: '((price * count) / (discount))',
+      fields: [
+        {
+          name: 'price',
+          label: '单价',
+          valueType: 'number',
+          required: true,
+          defaultValue: 100,
+          min: 0,
+        },
+        {
+          name: 'count',
+          label: 'count',
+          valueType: 'number',
+          required: true,
+        },
+        {
+          name: 'discount',
+          label: 'discount',
+          valueType: 'number',
+          required: true,
+        },
+      ],
+      result: {
+        label: '结果',
+        precision: 12,
+      },
+    });
+  });
+
+  it('creates reusable latex formula calculators', () => {
+    const calculator = createLatexFormulaCalculator({
+      source: '\\frac{price \\times count}{discount}',
+      fields: [
+        { name: 'price', label: '单价', defaultValue: 100 },
+        { name: 'count', label: '数量', defaultValue: 2 },
+        { name: 'discount', label: '折扣', defaultValue: 4 },
+      ],
+      result: {
+        label: '结果',
+      },
+    });
+
+    expect(calculator.expression).toBe('((price * count) / (discount))');
+    expect(calculator.variables).toEqual(['price', 'count', 'discount']);
+    expect(calculator.schema.fields.map((field) => field.name)).toEqual([
+      'price',
+      'count',
+      'discount',
+    ]);
+    expect(
+      calculator.calculate({
+        price: 100,
+        count: 2,
+        discount: 4,
+      }),
+    ).toEqual({
+      value: 50,
+      errors: [],
+    });
+  });
+
+  it('keeps invalid latex calculators safe to call', () => {
+    const calculator = createLatexFormulaCalculator({
+      source: '\\frac{price}{count',
+    });
+
+    expect(calculator.expression).toBe('');
+    expect(calculator.variables).toEqual([]);
+    expect(calculator.schema).toEqual({
+      expression: '',
+      fields: [],
+    });
+    expect(calculator.calculate({ price: 100, count: 2 })).toEqual({
+      value: null,
+      errors: [
+        {
+          code: 'INVALID_EXPRESSION',
+          message: 'LaTeX formula is invalid or unsupported.',
         },
       ],
     });

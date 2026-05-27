@@ -117,32 +117,6 @@ pre {
   font-size: 28px;
 }
 
-.metric-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.metric {
-  display: grid;
-  gap: 6px;
-  border: 1px solid #d8e0ea;
-  border-radius: 8px;
-  background: #f8fafc;
-  padding: 14px;
-}
-
-.metric span {
-  color: #64748b;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.metric strong {
-  color: #18202f;
-  font-size: 22px;
-}
-
 .error-list {
   margin: 0;
   border: 1px solid #f0b8b8;
@@ -158,10 +132,6 @@ pre {
   }
 
   .workspace {
-    grid-template-columns: 1fr;
-  }
-
-  .metric-grid {
     grid-template-columns: 1fr;
   }
 }
