@@ -198,6 +198,8 @@ const schema = createFormulaSchema({
 ```ts
 import {
   calculateLatexFormula,
+  createLatexFormulaCalculator,
+  createLatexFormulaSchema,
   latexToExpression,
   parseLatexFormula,
 } from 'katex-ui/parser';
@@ -218,6 +220,25 @@ calculateLatexFormula('\\frac{price \\times count}{discount}', {
   count: 2,
   discount: 4,
 });
+// { value: 50, errors: [] }
+
+const schema = createLatexFormulaSchema({
+  source: '\\frac{price \\times count}{discount}',
+  fields: [
+    { name: 'price', label: 'Price', defaultValue: 100 },
+    { name: 'count', label: 'Count', defaultValue: 2 },
+    { name: 'discount', label: 'Discount', defaultValue: 4 },
+  ],
+  result: {
+    label: 'Total',
+  },
+});
+
+const calculator = createLatexFormulaCalculator({
+  source: '\\frac{price \\times count}{discount}',
+});
+
+calculator.calculate({ price: 100, count: 2, discount: 4 });
 // { value: 50, errors: [] }
 ```
 

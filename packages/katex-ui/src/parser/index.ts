@@ -1,5 +1,6 @@
 import {
   calculateFormula,
+  createFormulaRunner,
   extractVariables,
   validateFormula,
 } from '../core/index.js';
@@ -7,6 +8,12 @@ import type {
   FormulaCalculationResult,
   FormulaValues,
 } from '../core/index.js';
+import { createFormulaSchema } from '../schema/index.js';
+import type {
+  FormulaField,
+  FormulaResultSchema,
+  FormulaSchema,
+} from '../schema/index.js';
 
 export type FormulaParseErrorCode =
   | 'EMPTY_LATEX'
@@ -23,6 +30,17 @@ export type ParsedLatexFormula = {
   expression: string;
   variables: string[];
   errors: FormulaParseError[];
+};
+
+export type CreateLatexFormulaSchemaOptions = {
+  source: string;
+  fields?: FormulaField[];
+  result?: FormulaResultSchema;
+};
+
+export type LatexFormulaCalculator = ParsedLatexFormula & {
+  schema: FormulaSchema;
+  calculate: (values: FormulaValues) => FormulaCalculationResult;
 };
 
 const commandMap: Record<string, string> = {
@@ -278,4 +296,57 @@ export const calculateLatexFormula = (
   }
 
   return calculateFormula(parsed.expression, values);
+};
+
+export const createLatexFormulaSchema = (
+  sourceOrOptions: string | CreateLatexFormulaSchemaOptions,
+  fields: FormulaField[] = [],
+): FormulaSchema => {
+  const source =
+    typeof sourceOrOptions === 'string'
+      ? sourceOrOptions
+      : sourceOrOptions.source;
+  const parsed = parseLatexFormula(source);
+
+  return createFormulaSchema({
+    expression: parsed.expression,
+    fields:
+      typeof sourceOrOptions === 'string'
+        ? fields
+        : sourceOrOptions.fields ?? [],
+    result:
+      typeof sourceOrOptions === 'string'
+        ? undefined
+        : sourceOrOptions.result,
+  });
+};
+
+export const createLatexFormulaCalculator = (
+  options: CreateLatexFormulaSchemaOptions,
+): LatexFormulaCalculator => {
+  const parsed = parseLatexFormula(options.source);
+  const schema = createFormulaSchema({
+    expression: parsed.expression,
+    fields: options.fields ?? [],
+    result: options.result,
+  });
+  const runner = createFormulaRunner(parsed.expression);
+
+  return {
+    ...parsed,
+    schema,
+    calculate: (values) => {
+      if (parsed.errors.length > 0) {
+        return {
+          value: null,
+          errors: parsed.errors.map((error) => ({
+            code: 'INVALID_EXPRESSION',
+            message: error.message,
+          })),
+        };
+      }
+
+      return runner.calculate(values);
+    },
+  };
 };
