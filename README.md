@@ -49,6 +49,7 @@ Most dynamic-form tools stop at rendering fields. Most formula tools stop at eva
 - **Framework-free core**: `katex-ui` does not depend on React, Vue, or pdyform.
 - **React adapter**: `katex-ui-react` converts `FormulaSchema` into `pdyform-react` schema.
 - **Real-time results**: calculate on every form change.
+- **LaTeX input bridge**: convert common LaTeX formulas like `\frac{a}{b}` into calculable expressions.
 - **Batch formulas**: derive `subtotal`, `tax`, `total`, or any ordered calculation chain.
 - **Precompiled runners**: parse once, calculate many times for fast UI feedback.
 - **Display-safe formatting**: turn `237.60000000000002` into `237.6`.
@@ -189,6 +190,38 @@ const schema = createFormulaSchema({
 ```
 
 `createFormulaSchema` keeps variable order from the formula, fills missing field metadata, and ignores fields that are not used by the expression.
+
+## Parser API
+
+`katex-ui/parser` converts a pragmatic LaTeX subset into the expression syntax used by `katex-ui/core`.
+
+```ts
+import {
+  calculateLatexFormula,
+  latexToExpression,
+  parseLatexFormula,
+} from 'katex-ui/parser';
+
+latexToExpression('\\frac{price \\times count}{discount}');
+// '((price * count) / (discount))'
+
+parseLatexFormula('\\sqrt{price + tax}');
+// {
+//   source: '\\sqrt{price + tax}',
+//   expression: 'sqrt(price + tax)',
+//   variables: ['price', 'tax'],
+//   errors: []
+// }
+
+calculateLatexFormula('\\frac{price \\times count}{discount}', {
+  price: 100,
+  count: 2,
+  discount: 4,
+});
+// { value: 50, errors: [] }
+```
+
+This is a conversion layer, not a full LaTeX engine. It supports common calculation syntax such as `\frac`, `\sqrt`, `\times`, `\cdot`, `\div`, braced powers, and basic function commands like `\min`, `\max`, and `\round`.
 
 ## React API
 
