@@ -1,46 +1,65 @@
 # katex-ui
 
-Formula-driven dynamic forms for modern frontends.
+Build formula-powered forms without turning your product into a spreadsheet.
 
-`katex-ui` lets you turn a calculation formula into a typed form schema, render it with your UI framework, and calculate the result in real time. The core package is framework-free. React support ships as a separate adapter so users only install the UI runtime they actually need.
+`katex-ui` turns expressions like `price * count * discount` into a stable form schema, renders that schema in React through `pdyform-react`, and calculates results as users type. The core package stays framework-free, so formula parsing, validation, schema normalization, batching, and result formatting can run anywhere.
 
 ```tsx
 import { createFormulaSchema } from 'katex-ui/schema';
 import { FormulaForm } from 'katex-ui-react';
 
-const schema = createFormulaSchema('price * count * discount', [
-  { name: 'price', label: 'Price', defaultValue: 99 },
-  { name: 'count', label: 'Count', defaultValue: 2 },
-  { name: 'discount', label: 'Discount', defaultValue: 0.8 },
-]);
+const schema = createFormulaSchema({
+  expression: 'price * count * discount',
+  fields: [
+    { name: 'price', label: 'Price', defaultValue: 99, min: 0, step: 0.01 },
+    { name: 'count', label: 'Count', defaultValue: 2, min: 1 },
+    { name: 'discount', label: 'Discount', defaultValue: 0.8, min: 0, max: 1 },
+  ],
+  result: {
+    label: 'Total',
+    precision: 12,
+  },
+});
 
-export const App = () => (
-  <FormulaForm
-    schema={schema}
-    onResult={(result) => {
-      console.log(result.value);
-    }}
-  />
+export const PricingForm = () => (
+  <FormulaForm schema={schema} showResult />
 );
 ```
 
-## Why katex-ui
+## Why It Exists
 
-- **Formula in, form out**: write `price * count`, get the fields required to collect `price` and `count`.
-- **UI-independent core**: `katex-ui` has no React, Vue, or pdyform dependency.
-- **Stable domain schema**: expose your business schema first, then adapt it to renderers.
-- **React adapter included**: `katex-ui-react` converts `FormulaSchema` to `pdyform-react`.
-- **Real-time calculation**: form state changes produce calculation results immediately.
-- **Monorepo ready**: pnpm workspace, Turbo, tsup, Vitest, Changesets, CI, release workflow, and GitHub Pages are already wired.
+Most dynamic-form tools stop at rendering fields. Most formula tools stop at evaluating math. Real business software needs both:
+
+- pricing calculators
+- quote builders
+- tax and discount forms
+- scoring models
+- internal operations tools
+- financial planning widgets
+- any workflow where non-engineers define calculation logic
+
+`katex-ui` gives you the missing middle layer: a domain schema that connects formulas, generated fields, UI renderers, and calculation results.
+
+## Highlights
+
+- **Formula to fields**: extract variables and generate form fields automatically.
+- **Stable schema boundary**: expose `FormulaSchema`, not renderer internals.
+- **Framework-free core**: `katex-ui` does not depend on React, Vue, or pdyform.
+- **React adapter**: `katex-ui-react` converts `FormulaSchema` into `pdyform-react` schema.
+- **Real-time results**: calculate on every form change.
+- **Batch formulas**: derive `subtotal`, `tax`, `total`, or any ordered calculation chain.
+- **Precompiled runners**: parse once, calculate many times for fast UI feedback.
+- **Display-safe formatting**: turn `237.60000000000002` into `237.6`.
+- **Release-ready repo**: pnpm workspace, Turbo, tsup, Vitest, Changesets, CI, release workflow, and GitHub Pages.
 
 ## Packages
 
-| Package | Purpose |
+| Package | Install when you need |
 | --- | --- |
-| `katex-ui` | Core formula parsing, validation, calculation, and schema utilities. |
-| `katex-ui-react` | React adapter backed by `pdyform-react`. |
+| `katex-ui` | Formula parsing, validation, calculation, batching, formatting, and schema utilities. |
+| `katex-ui-react` | React rendering through `pdyform-react`. |
 
-Vue support is intentionally deferred. The package boundary is already prepared for a future `katex-ui-vue` adapter without adding Vue to the core package.
+Vue support is planned as a separate adapter. It will not add Vue to the core package.
 
 ## Installation
 
@@ -56,23 +75,23 @@ React rendering:
 pnpm add katex-ui katex-ui-react pdyform-core pdyform-react react react-dom
 ```
 
-## Core Usage
-
-Use `katex-ui/core` when you only need formula behavior.
+## Core API
 
 ```ts
 import {
   calculateFormula,
+  calculateFormulaBatch,
+  createFormulaRunner,
   extractVariables,
+  formatFormulaValue,
+  getFormulaSummary,
   validateFormula,
 } from 'katex-ui/core';
+```
 
-extractVariables('price * count');
-// ['price', 'count']
+### Calculate One Formula
 
-validateFormula('price * count');
-// { valid: true, errors: [] }
-
+```ts
 calculateFormula('price * count', {
   price: 10,
   count: 3,
@@ -80,97 +99,145 @@ calculateFormula('price * count', {
 // { value: 30, errors: [] }
 ```
 
-Invalid input returns structured errors instead of throwing:
+### Inspect a Formula
 
 ```ts
-calculateFormula('price * count', { price: 10 });
+getFormulaSummary('price * count');
 // {
-//   value: null,
-//   errors: [
-//     {
-//       code: 'MISSING_VARIABLE',
-//       message: 'Variable "count" is required.',
-//       variable: 'count'
-//     }
-//   ]
+//   expression: 'price * count',
+//   variables: ['price', 'count'],
+//   valid: true,
+//   errors: []
 // }
 ```
 
-## Schema Usage
-
-Use `katex-ui/schema` to create a stable katex-ui schema from a formula.
+### Precompile for Repeated Calculation
 
 ```ts
-import { createFormulaSchema } from 'katex-ui/schema';
+const runner = createFormulaRunner('price * count * discount');
 
-const schema = createFormulaSchema('amount * (1 + taxRate)', [
-  { name: 'amount', label: 'Amount', defaultValue: 1000 },
-  { name: 'taxRate', label: 'Tax rate', defaultValue: 0.06 },
-]);
+runner.variables;
+// ['price', 'count', 'discount']
+
+runner.calculate({
+  price: 99,
+  count: 2,
+  discount: 0.8,
+});
+// { value: 158.4, errors: [] }
 ```
 
-Generated schema:
+### Batch Calculation
 
 ```ts
-{
+calculateFormulaBatch(
+  [
+    { name: 'subtotal', expression: 'price * count' },
+    { name: 'tax', expression: 'subtotal * taxRate' },
+    { name: 'total', expression: 'subtotal + tax' },
+  ],
+  {
+    price: 100,
+    count: 2,
+    taxRate: 0.06,
+  },
+);
+// values.subtotal === 200
+// values.tax === 12
+// values.total === 212
+```
+
+### Format Results
+
+```ts
+formatFormulaValue(237.60000000000002, { precision: 12 });
+// '237.6'
+
+formatFormulaValue(1234.5, {
+  locale: 'en-US',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+// '1,234.50'
+```
+
+## Schema API
+
+```ts
+import {
+  createFormulaSchema,
+  normalizeFormulaSchema,
+} from 'katex-ui/schema';
+```
+
+Create a schema from a formula:
+
+```ts
+const schema = createFormulaSchema({
   expression: 'amount * (1 + taxRate)',
   fields: [
-    {
-      name: 'amount',
-      label: 'Amount',
-      valueType: 'number',
-      required: true,
-      defaultValue: 1000,
-    },
-    {
-      name: 'taxRate',
-      label: 'Tax rate',
-      valueType: 'number',
-      required: true,
-      defaultValue: 0.06,
-    },
+    { name: 'amount', label: 'Amount', defaultValue: 1000, min: 0 },
+    { name: 'taxRate', label: 'Tax rate', defaultValue: 0.06, min: 0, max: 1 },
   ],
-}
+  result: {
+    label: 'Total',
+    precision: 12,
+  },
+});
 ```
 
-## React Usage
+`createFormulaSchema` keeps variable order from the formula, fills missing field metadata, and ignores fields that are not used by the expression.
 
-`katex-ui-react` renders the schema through `pdyform-react` and reports calculation results.
+## React API
 
 ```tsx
-import { useMemo, useState } from 'react';
 import { createFormulaSchema } from 'katex-ui/schema';
 import { FormulaForm } from 'katex-ui-react';
 
-export const PricingForm = () => {
-  const [result, setResult] = useState<number | null>(null);
+const schema = createFormulaSchema({
+  expression: 'price * count * discount',
+  fields: [
+    { name: 'price', label: 'Price', defaultValue: 99, min: 0, step: 0.01 },
+    { name: 'count', label: 'Count', defaultValue: 2, min: 1 },
+    { name: 'discount', label: 'Discount', defaultValue: 0.8, min: 0, max: 1 },
+  ],
+  result: {
+    label: 'Total',
+    precision: 12,
+  },
+});
 
-  const schema = useMemo(
-    () =>
-      createFormulaSchema('price * count * discount', [
-        { name: 'price', label: 'Price', defaultValue: 99 },
-        { name: 'count', label: 'Count', defaultValue: 2 },
-        { name: 'discount', label: 'Discount', defaultValue: 0.8 },
-      ]),
-    [],
-  );
+export const App = () => (
+  <FormulaForm
+    schema={schema}
+    showResult
+    onValuesChange={(values) => console.log(values)}
+    onResult={(result) => console.log(result)}
+  />
+);
+```
 
-  return (
-    <>
-      <FormulaForm
-        schema={schema}
-        initialValues={{
-          price: 99,
-          count: 2,
-          discount: 0.8,
-        }}
-        onResult={(nextResult) => setResult(nextResult.value)}
-      />
+Need full control over result rendering?
 
-      <strong>{result ?? '-'}</strong>
-    </>
-  );
-};
+```tsx
+<FormulaForm
+  schema={schema}
+  showResult
+  formatResult={(result) =>
+    result.value === null ? 'No result' : `$${result.value.toFixed(2)}`
+  }
+/>
+```
+
+Need to inspect the renderer schema?
+
+```tsx
+<FormulaForm
+  schema={schema}
+  onPdyformSchema={(pdyformSchema) => {
+    console.log(pdyformSchema);
+  }}
+/>
 ```
 
 ## Architecture
@@ -180,11 +247,11 @@ formula expression
         |
         v
 katex-ui/core
-  parse, validate, extract variables, calculate
+  parse, validate, summarize, calculate, batch, format
         |
         v
 katex-ui/schema
-  FormulaSchema
+  FormulaSchema, normalization, result metadata
         |
         v
 katex-ui-react
@@ -195,44 +262,30 @@ pdyform-react
   dynamic form rendering
 ```
 
-The important boundary is that `FormulaSchema` belongs to `katex-ui`, not to pdyform. That keeps the public API stable even if the underlying renderer changes later.
+The key rule: `FormulaSchema` belongs to `katex-ui`, not to pdyform. Renderer adapters are allowed to change; the domain schema should stay stable.
 
 ## Formula Support
 
-The first release is intentionally focused:
+The core uses `expr-eval`, so it supports arithmetic expressions, parentheses, and built-in functions such as `min`, `max`, `round`, `abs`, `floor`, and `ceil`.
 
-- arithmetic expressions
-- parentheses
-- built-in functions supported by `expr-eval`, such as `min`, `max`, `round`, `abs`
+Supported now:
+
+- variable extraction
+- syntax validation
 - finite numeric results
 - missing variable detection
-- boolean values converted to `1` and `0` during calculation
+- boolean values as `1` and `0`
+- precompiled runners
+- ordered batch calculation
+- display formatting
 
-Not included in the first release:
+Intentionally not supported:
 
-- arbitrary JavaScript evaluation
+- arbitrary JavaScript execution
+- `eval`
 - async formula execution
-- cross-form dependency graphs
-- visual formula builders
-
-## Development
-
-```bash
-pnpm install
-pnpm dev
-pnpm test
-pnpm build
-```
-
-Useful commands:
-
-```bash
-pnpm lint
-pnpm typecheck
-pnpm changeset
-pnpm --filter demo-react dev
-pnpm --filter docs dev
-```
+- remote data fetching
+- visual formula authoring
 
 ## Repository Layout
 
@@ -246,6 +299,23 @@ packages/
   katex-ui-react React adapter for pdyform-react
 ```
 
+## Development
+
+```bash
+pnpm install
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+```
+
+Run local apps:
+
+```bash
+pnpm --filter demo-react dev
+pnpm --filter docs dev
+```
+
 ## Release Flow
 
 This repo uses Changesets.
@@ -256,12 +326,16 @@ pnpm version
 pnpm release
 ```
 
-GitHub Actions are configured for:
+GitHub Actions are configured for CI, Changesets release, npm publish, and GitHub Pages.
 
-- PR and main branch verification
-- Changesets release PR and publish flow
-- GitHub Pages deployment for docs
+## Roadmap
+
+- Vue adapter
+- richer field presets
+- formula dependency graph visualization
+- custom function registry
+- schema import/export examples
 
 ## Status
 
-This project is in MVP stage. The core API is deliberately small so the formula-to-form contract can stabilize before adding Vue support and more advanced form orchestration.
+`katex-ui` is early, but already useful for formula-driven forms, calculators, and internal tools. The API is intentionally small enough to stabilize, while the package boundary leaves room for more renderers later.

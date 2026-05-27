@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createFormulaSchema } from 'katex-ui/schema';
 import { FormulaForm } from 'katex-ui-react';
+import { calculateFormulaBatch, formatFormulaValue } from 'katex-ui/core';
 import type { FormulaCalculationResult, FormulaValues } from 'katex-ui/core';
 import './styles.css';
 
@@ -37,8 +38,33 @@ const App = () => {
   });
 
   const schema = React.useMemo(
-    () => createFormulaSchema(expression, activeExample.fields),
+    () =>
+      createFormulaSchema({
+        expression,
+        fields: activeExample.fields,
+        result: {
+          label: '结果',
+          precision: 12,
+        },
+      }),
     [activeExample.fields, expression],
+  );
+
+  const batchResult = React.useMemo(
+    () =>
+      calculateFormulaBatch(
+        [
+          { name: 'subtotal', expression: 'price * count' },
+          { name: 'tax', expression: 'subtotal * taxRate' },
+          { name: 'total', expression: 'subtotal + tax' },
+        ],
+        {
+          price: values.price ?? 99,
+          count: values.count ?? 2,
+          taxRate: 0.06,
+        },
+      ),
+    [values.count, values.price],
   );
 
   return (
@@ -101,16 +127,11 @@ const App = () => {
             initialValues={Object.fromEntries(
               schema.fields.map((field) => [field.name, field.defaultValue]),
             )}
-            onChange={setValues}
+            onValuesChange={setValues}
             onResult={setResult}
+            resultClassName="result-bar"
+            showResult
           />
-
-          <div className="result-bar">
-            <span>结果</span>
-            <strong>
-              {result.value === null ? '-' : Number(result.value.toPrecision(12))}
-            </strong>
-          </div>
 
           {result.errors.length > 0 && (
             <ul className="error-list">
@@ -125,6 +146,22 @@ const App = () => {
           <div>
             <h2>当前表单值</h2>
             <pre>{JSON.stringify(values, null, 2)}</pre>
+          </div>
+
+          <div>
+            <h2>批量公式</h2>
+            <div className="metric-grid">
+              {Object.entries(batchResult.results).map(([name, item]) => (
+                <div className="metric" key={name}>
+                  <span>{name}</span>
+                  <strong>
+                    {formatFormulaValue(item.value, {
+                      precision: 12,
+                    })}
+                  </strong>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>

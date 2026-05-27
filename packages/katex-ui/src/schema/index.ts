@@ -8,6 +8,8 @@ export type FormulaFieldOption = {
   value: string | number;
 };
 
+export type FormulaFieldLayout = 'vertical' | 'horizontal' | 'none';
+
 export type FormulaField = {
   name: string;
   label?: string;
@@ -17,27 +19,67 @@ export type FormulaField = {
   placeholder?: string;
   description?: string;
   options?: FormulaFieldOption[];
+  min?: number;
+  max?: number;
+  step?: number;
+  layout?: FormulaFieldLayout;
+  componentProps?: Record<string, unknown>;
+};
+
+export type FormulaResultSchema = {
+  label?: string;
+  fallback?: string;
+  precision?: number;
 };
 
 export type FormulaSchema = {
   expression: string;
   fields: FormulaField[];
+  result?: FormulaResultSchema;
+};
+
+export type CreateFormulaSchemaOptions = {
+  expression: string;
+  fields?: FormulaField[];
+  result?: FormulaResultSchema;
 };
 
 export const createFormulaSchema = (
-  expression: string,
+  expressionOrOptions: string | CreateFormulaSchemaOptions,
   fields: FormulaField[] = [],
 ): FormulaSchema => {
-  const configuredFields = new Map(fields.map((field) => [field.name, field]));
+  const expression =
+    typeof expressionOrOptions === 'string'
+      ? expressionOrOptions
+      : expressionOrOptions.expression;
+
+  return normalizeFormulaSchema({
+    expression,
+    fields:
+      typeof expressionOrOptions === 'string'
+        ? fields
+        : expressionOrOptions.fields ?? [],
+    result:
+      typeof expressionOrOptions === 'string'
+        ? undefined
+        : expressionOrOptions.result,
+  });
+};
+
+export const normalizeFormulaSchema = (schema: FormulaSchema): FormulaSchema => {
+  const configuredFields = new Map(
+    schema.fields.map((field) => [field.name, field]),
+  );
 
   return {
-    expression,
-    fields: extractVariables(expression).map((name) => ({
+    expression: schema.expression,
+    fields: extractVariables(schema.expression).map((name) => ({
       name,
       label: name,
       valueType: 'number',
       required: true,
       ...configuredFields.get(name),
     })),
+    ...(schema.result ? { result: schema.result } : {}),
   };
 };
