@@ -1,5 +1,11 @@
 # katex-ui
 
+## 0.2.0
+
+### Minor Changes
+
+- b08bf62: Add formula summaries, display formatting, reusable runners, batch calculation, richer schema metadata, React result rendering, package READMEs, and expanded docs.
+
 ## 0.1.0
 
 ### Minor Changes
