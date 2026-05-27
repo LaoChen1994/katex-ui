@@ -13,6 +13,7 @@ pnpm add katex-ui
 ## What You Get
 
 - `katex-ui/core`: formula utilities
+- `katex-ui/parser`: LaTeX subset to expression conversion
 - `katex-ui/schema`: stable form schema utilities
 - no React dependency
 - no Vue dependency
@@ -86,6 +87,24 @@ const schema = createFormulaSchema({
   },
 });
 ```
+
+## LaTeX Parser
+
+```ts
+import { calculateLatexFormula, latexToExpression } from 'katex-ui/parser';
+
+latexToExpression('\\frac{price \\times count}{discount}');
+// '((price * count) / (discount))'
+
+calculateLatexFormula('\\frac{price \\times count}{discount}', {
+  price: 100,
+  count: 2,
+  discount: 4,
+});
+// { value: 50, errors: [] }
+```
+
+The parser is a focused conversion layer for common calculation formulas. It is not a full LaTeX engine.
 
 ## Result Formatting
 

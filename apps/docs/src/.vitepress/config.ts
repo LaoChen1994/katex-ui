@@ -22,6 +22,7 @@ export default defineConfig({
         text: 'API',
         items: [
           { text: 'Core', link: '/api/core' },
+          { text: 'Parser', link: '/api/parser' },
           { text: 'Schema', link: '/api/schema' },
           { text: 'React', link: '/api/react' },
         ],
