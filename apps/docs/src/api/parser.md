@@ -19,8 +19,11 @@ latexToExpression('\\frac{price \\times count}{discount}');
 | `a \cdot b` | `a * b` |
 | `a \div b` | `a / b` |
 | `\frac{a}{b}` | `((a) / (b))` |
+| `\dfrac{a}{b}` | `((a) / (b))` |
+| `\tfrac{a}{b}` | `((a) / (b))` |
 | `\sqrt{x}` | `sqrt(x)` |
 | `x^{2}` | `x^(2)` |
+| `price_{net}` | `price_net` |
 | `\left(a + b\right)` | `(a + b)` |
 | `\min(a, b)` | `min(a, b)` |
 | `\max(a, b)` | `max(a, b)` |
@@ -29,8 +32,11 @@ latexToExpression('\\frac{price \\times count}{discount}');
 | `\cos{x}` | `cos(x)` |
 | `\tan{x}` | `tan(x)` |
 | `\log{x}` | `log(x)` |
+| `\ln{x}` | `log(x)` |
+| `\exp{x}` | `exp(x)` |
 | `\abs{x}` | `abs(x)` |
 | `\operatorname{round}(x)` | `round(x)` |
+| `\operatorname{sqrt}(x)` | `sqrt(x)` |
 
 不支持的 LaTeX 命令会返回 `INVALID_LATEX`，不会被静默转换成变量名。这个策略可以避免用户误以为复杂排版语法已经进入计算链路。
 

@@ -19,6 +19,9 @@ describe('latex parser utilities', () => {
     expect(latexToExpression('\\frac{price \\times count}{discount}')).toBe(
       '((price * count) / (discount))',
     );
+    expect(latexToExpression('\\dfrac{amount}{count} + \\tfrac{fee}{rate}')).toBe(
+      '((amount) / (count)) + ((fee) / (rate))',
+    );
   });
 
   it('converts nested fractions', () => {
@@ -48,12 +51,27 @@ describe('latex parser utilities', () => {
     expect(latexToExpression('\\log{price} + \\abs{discount}')).toBe(
       'log(price) + abs(discount)',
     );
+    expect(latexToExpression('\\ln{amount} + \\exp{rate}')).toBe(
+      'log(amount) + exp(rate)',
+    );
   });
 
   it('converts operatorname functions', () => {
     expect(
-      latexToExpression('\\operatorname{round}(price) + \\operatorname{max}(a, b)'),
-    ).toBe('round(price) + max(a, b)');
+      latexToExpression(
+        '\\operatorname{round}(price) + \\operatorname{sqrt}(a) + \\operatorname{ln}(b)',
+      ),
+    ).toBe('round(price) + sqrt(a) + log(b)');
+  });
+
+  it('converts simple variable subscripts', () => {
+    expect(latexToExpression('price_{net} + tax_1')).toBe('price_net + tax_1');
+    expect(parseLatexFormula('price_{net} + tax_1')).toEqual({
+      source: 'price_{net} + tax_1',
+      expression: 'price_net + tax_1',
+      variables: ['price_net', 'tax_1'],
+      errors: [],
+    });
   });
 
   it('removes latex sizing commands without changing grouping', () => {

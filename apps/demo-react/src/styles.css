@@ -117,6 +117,48 @@ pre {
   font-size: 28px;
 }
 
+.field-config {
+  display: grid;
+  gap: 10px;
+}
+
+.field-config-row {
+  display: grid;
+  grid-template-columns: minmax(90px, 0.7fr) repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  align-items: end;
+  border: 1px solid #d8e0ea;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 12px;
+}
+
+.field-config-row label {
+  display: grid;
+  gap: 6px;
+}
+
+.field-config-row label span,
+.field-name {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.field-name {
+  display: block;
+  overflow-wrap: anywhere;
+  color: #18202f;
+  font-size: 13px;
+}
+
+.empty-state {
+  border: 1px dashed #ccd5e2;
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 14px;
+}
+
 .error-list {
   margin: 0;
   border: 1px solid #f0b8b8;
@@ -132,6 +174,10 @@ pre {
   }
 
   .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .field-config-row {
     grid-template-columns: 1fr;
   }
 }

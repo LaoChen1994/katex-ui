@@ -48,17 +48,22 @@ const commandMap: Record<string, string> = {
   '\\cdot': '*',
   '\\cos': 'cos',
   '\\div': '/',
+  '\\exp': 'exp',
   '\\left': '',
+  '\\ln': 'log',
   '\\log': 'log',
   '\\max': 'max',
   '\\min': 'min',
   '\\operatorname{abs}': 'abs',
   '\\operatorname{cos}': 'cos',
+  '\\operatorname{exp}': 'exp',
+  '\\operatorname{ln}': 'log',
   '\\operatorname{log}': 'log',
   '\\operatorname{max}': 'max',
   '\\operatorname{min}': 'min',
   '\\operatorname{round}': 'round',
   '\\operatorname{sin}': 'sin',
+  '\\operatorname{sqrt}': 'sqrt',
   '\\operatorname{tan}': 'tan',
   '\\right': '',
   '\\round': 'round',
@@ -176,6 +181,30 @@ const replacePowerGroups = (source: string): string | null => {
   return result;
 };
 
+const replaceSubscriptGroups = (source: string): string | null => {
+  let result = '';
+  let index = 0;
+
+  while (index < source.length) {
+    if (source[index] !== '_' || source[index + 1] !== '{') {
+      result += source[index];
+      index += 1;
+      continue;
+    }
+
+    const group = readBracedGroup(source, index + 1);
+
+    if (!group || !/^[a-zA-Z0-9_]+$/.test(group.content)) {
+      return null;
+    }
+
+    result += `_${group.content}`;
+    index = group.endIndex;
+  }
+
+  return result;
+};
+
 export const latexToExpression = (source: string): string => {
   let expression = source.trim();
 
@@ -183,23 +212,25 @@ export const latexToExpression = (source: string): string => {
     return '';
   }
 
-  const fractionExpression = replaceLatexCommand(
-    expression,
-    '\\frac',
-    (numerator, denominator) => {
-      if (denominator === undefined) {
-        return '';
-      }
+  for (const fractionCommand of ['\\frac', '\\dfrac', '\\tfrac']) {
+    const fractionExpression = replaceLatexCommand(
+      expression,
+      fractionCommand,
+      (numerator, denominator) => {
+        if (denominator === undefined) {
+          return '';
+        }
 
-      return `((${latexToExpression(numerator)}) / (${latexToExpression(denominator)}))`;
-    },
-  );
+        return `((${latexToExpression(numerator)}) / (${latexToExpression(denominator)}))`;
+      },
+    );
 
-  if (fractionExpression === null) {
-    return '';
+    if (fractionExpression === null) {
+      return '';
+    }
+
+    expression = fractionExpression;
   }
-
-  expression = fractionExpression;
 
   const sqrtExpression = replaceLatexCommand(expression, '\\sqrt', (value) => {
     return `sqrt(${latexToExpression(value)})`;
@@ -210,6 +241,44 @@ export const latexToExpression = (source: string): string => {
   }
 
   expression = sqrtExpression;
+
+  for (const functionCommand of [
+    '\\abs',
+    '\\cos',
+    '\\exp',
+    '\\ln',
+    '\\log',
+    '\\sin',
+    '\\tan',
+  ]) {
+    const commandExpression = replaceLatexCommand(
+      expression,
+      functionCommand,
+      (value) => {
+        const functionName = commandMap[functionCommand];
+
+        if (!functionName) {
+          return '';
+        }
+
+        return `${functionName}(${latexToExpression(value)})`;
+      },
+    );
+
+    if (commandExpression === null) {
+      return '';
+    }
+
+    expression = commandExpression;
+  }
+
+  const subscriptExpression = replaceSubscriptGroups(expression);
+
+  if (subscriptExpression === null) {
+    return '';
+  }
+
+  expression = subscriptExpression;
 
   const powerExpression = replacePowerGroups(expression);
 
