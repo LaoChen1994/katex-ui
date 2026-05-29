@@ -1,5 +1,12 @@
 # katex-ui-react
 
+## 0.2.4
+
+### Patch Changes
+
+- Updated dependencies [ab4bb3d]
+  - katex-ui@0.5.0
+
 ## 0.2.3
 
 ### Patch Changes

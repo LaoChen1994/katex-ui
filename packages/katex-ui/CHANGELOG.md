@@ -1,5 +1,11 @@
 # katex-ui
 
+## 0.5.0
+
+### Minor Changes
+
+- ab4bb3d: Expand LaTeX parser support for fraction aliases, logarithm and exponential commands, operatorname aliases, and simple variable subscripts.
+
 ## 0.4.0
 
 ### Minor Changes
