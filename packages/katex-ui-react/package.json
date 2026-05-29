@@ -28,6 +28,7 @@
     "react-dom": "^18.0.0"
   },
   "devDependencies": {
+    "happy-dom": "^20.9.0",
     "pdyform-core": "^1.1.1",
     "pdyform-react": "^1.1.2",
     "react": "^18.3.1",

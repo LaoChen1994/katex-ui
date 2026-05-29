@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { createLatexFormulaCalculator } from 'katex-ui/parser';
 import { FormulaForm } from 'katex-ui-react';
 import type { FormulaCalculationResult, FormulaValues } from 'katex-ui/core';
+import type { FormulaField } from 'katex-ui/schema';
 import './styles.css';
 
 const orderExample = {
@@ -30,6 +31,9 @@ const examples = [
 const App = () => {
   const [activeExample, setActiveExample] = React.useState(orderExample);
   const [source, setSource] = React.useState(activeExample.source);
+  const [fields, setFields] = React.useState<FormulaField[]>(
+    activeExample.fields,
+  );
   const [values, setValues] = React.useState<FormulaValues>({});
   const [result, setResult] = React.useState<FormulaCalculationResult>({
     value: null,
@@ -40,15 +44,43 @@ const App = () => {
     () =>
       createLatexFormulaCalculator({
         source,
-        fields: activeExample.fields,
+        fields,
         result: {
           label: '结果',
           precision: 12,
         },
       }),
-    [activeExample.fields, source],
+    [fields, source],
   );
   const { schema } = calculator;
+
+  const updateField = (
+    name: string,
+    field: Pick<FormulaField, 'defaultValue' | 'label' | 'min'>,
+  ) => {
+    setFields((currentFields) => {
+      const nextFields = currentFields.map((currentField) =>
+        currentField.name === name
+          ? {
+              ...currentField,
+              ...field,
+            }
+          : currentField,
+      );
+
+      if (nextFields.some((currentField) => currentField.name === name)) {
+        return nextFields;
+      }
+
+      return [
+        ...nextFields,
+        {
+          name,
+          ...field,
+        },
+      ];
+    });
+  };
 
   return (
     <main className="app-shell">
@@ -69,6 +101,12 @@ const App = () => {
                 if (nextExample) {
                   setActiveExample(nextExample);
                   setSource(nextExample.source);
+                  setFields(nextExample.fields);
+                  setValues({});
+                  setResult({
+                    value: null,
+                    errors: [],
+                  });
                 }
               }}
             >
@@ -95,6 +133,74 @@ const App = () => {
           <div>
             <h2>计算表达式</h2>
             <pre>{calculator.expression || 'LaTeX formula is invalid.'}</pre>
+          </div>
+
+          <div>
+            <h2>字段配置</h2>
+            <div className="field-config">
+              {schema.fields.map((field) => (
+                <div className="field-config-row" key={field.name}>
+                  <div>
+                    <span className="field-name">{field.name}</span>
+                  </div>
+                  <label>
+                    <span>标签</span>
+                    <input
+                      value={field.label ?? field.name}
+                      onChange={(event) =>
+                        updateField(field.name, {
+                          label: event.target.value,
+                        })
+                      }
+                    />
+                  </label>
+                  <label>
+                    <span>默认值</span>
+                    <input
+                      inputMode="decimal"
+                      value={
+                        typeof field.defaultValue === 'number' ||
+                        typeof field.defaultValue === 'string'
+                          ? field.defaultValue
+                          : ''
+                      }
+                      onChange={(event) => {
+                        const nextValue = Number(event.target.value);
+
+                        updateField(field.name, {
+                          defaultValue:
+                            event.target.value === '' ||
+                            !Number.isFinite(nextValue)
+                              ? undefined
+                              : nextValue,
+                        });
+                      }}
+                    />
+                  </label>
+                  <label>
+                    <span>最小值</span>
+                    <input
+                      inputMode="decimal"
+                      value={field.min ?? ''}
+                      onChange={(event) => {
+                        const nextValue = Number(event.target.value);
+
+                        updateField(field.name, {
+                          min:
+                            event.target.value === '' ||
+                            !Number.isFinite(nextValue)
+                              ? undefined
+                              : nextValue,
+                        });
+                      }}
+                    />
+                  </label>
+                </div>
+              ))}
+              {schema.fields.length === 0 && (
+                <p className="empty-state">当前公式没有可配置字段。</p>
+              )}
+            </div>
           </div>
 
           <div>
