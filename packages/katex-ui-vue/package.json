@@ -1,6 +1,6 @@
 {
-  "name": "katex-ui-react",
-  "version": "0.2.5",
+  "name": "katex-ui-vue",
+  "version": "0.0.0",
   "type": "module",
   "sideEffects": false,
   "files": [
@@ -13,25 +13,22 @@
     }
   },
   "scripts": {
-    "build": "tsup",
+    "build": "vite build && vue-tsc -p tsconfig.build.json",
     "lint": "eslint .",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
     "katex-ui": "workspace:*"
   },
   "peerDependencies": {
-    "pdyform-core": "^1.1.1",
-    "pdyform-react": "^1.1.2",
-    "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0"
+    "vue": "^3.5.0"
   },
   "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.4",
     "happy-dom": "^20.9.0",
-    "pdyform-core": "^1.1.1",
-    "pdyform-react": "^1.1.2",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "vite": "^6.0.7",
+    "vue": "^3.5.35",
+    "vue-tsc": "^2.2.12"
   }
 }

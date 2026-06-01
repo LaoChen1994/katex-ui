@@ -26,7 +26,7 @@ export default defineConfig({
           { text: 'Schema', link: '/api/schema' },
           { text: 'Config', link: '/api/config' },
           { text: 'React', link: '/api/react' },
-          { text: 'Vue Plan', link: '/api/vue' },
+          { text: 'Vue', link: '/api/vue' },
         ],
       },
     ],
