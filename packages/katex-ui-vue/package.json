@@ -1,6 +1,6 @@
 {
-  "name": "katex-ui-react",
-  "version": "0.2.5",
+  "name": "katex-ui-vue",
+  "version": "0.0.0",
   "type": "module",
   "sideEffects": false,
   "files": [
@@ -22,16 +22,10 @@
     "katex-ui": "workspace:*"
   },
   "peerDependencies": {
-    "pdyform-core": "^1.1.1",
-    "pdyform-react": "^1.1.2",
-    "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0"
+    "vue": "^3.5.0"
   },
   "devDependencies": {
     "happy-dom": "^20.9.0",
-    "pdyform-core": "^1.1.1",
-    "pdyform-react": "^1.1.2",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "vue": "^3.5.35"
   }
 }

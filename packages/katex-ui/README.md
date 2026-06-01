@@ -1,151 +1,71 @@
 # katex-ui
 
-Framework-free formula and schema utilities for formula-driven forms.
+[![npm](https://img.shields.io/npm/v/katex-ui?label=npm)](https://www.npmjs.com/package/katex-ui)
+[![demo](https://img.shields.io/badge/demo-GitHub%20Pages-2f6fed)](https://laochen1994.github.io/katex-ui/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-ready-3178c6)](https://www.typescriptlang.org/)
+[![coverage](https://img.shields.io/badge/coverage-90.37%25-7c3aed)](#quality)
+[![license](https://img.shields.io/badge/license-MIT-68a063)](https://github.com/LaoChen1994/katex-ui)
 
-Install this package when you want formula parsing, validation, calculation, result formatting, schema generation, or batch calculation without installing React, Vue, or any form renderer.
+Framework-free formula engine and schema toolkit for dynamic calculators.
 
-[Documentation](https://laochen1994.github.io/katex-ui/) · [GitHub](https://github.com/LaoChen1994/katex-ui)
+`katex-ui` owns the durable domain layer: expression validation, LaTeX conversion, variable extraction, serializable calculator config, schema normalization, batch calculation, reusable runners, and display-safe formatting.
+
+## Install
 
 ```bash
 pnpm add katex-ui
 ```
 
-## What You Get
+## Repository
 
-- `katex-ui/core`: formula utilities
-- `katex-ui/parser`: LaTeX subset to expression conversion
-- `katex-ui/schema`: stable form schema utilities
-- no React dependency
-- no Vue dependency
-- no pdyform dependency
+[github.com/LaoChen1994/katex-ui](https://github.com/LaoChen1994/katex-ui)
 
-## Formula Calculation
+## Homepage
 
-```ts
-import { calculateFormula } from 'katex-ui/core';
+[laochen1994.github.io/katex-ui/](https://laochen1994.github.io/katex-ui/)
 
-calculateFormula('price * count', {
-  price: 10,
-  count: 3,
-});
-// { value: 30, errors: [] }
-```
+## Highlights
 
-## Precompiled Runner
+- **Formula engine** - calculate arithmetic expressions with variables and functions.
+- **LaTeX bridge** - convert `\frac`, `\sqrt`, powers, functions, and simple subscripts.
+- **Schema generator** - turn variables into stable `FormulaSchema` fields.
+- **Calculator config** - serialize source, expression, fields, and result metadata.
+- **Batch formulas** - derive ordered values such as subtotal, tax, and total.
+- **Renderer agnostic** - no React, Vue, or form-renderer runtime dependency.
+
+## Quick Start
 
 ```ts
-import { createFormulaRunner } from 'katex-ui/core';
+import { createLatexFormulaCalculator } from 'katex-ui/parser';
 
-const runner = createFormulaRunner('price * count * discount');
-
-runner.variables;
-// ['price', 'count', 'discount']
-
-runner.calculate({
-  price: 99,
-  count: 2,
-  discount: 0.8,
-});
-```
-
-## Batch Calculation
-
-```ts
-import { calculateFormulaBatch } from 'katex-ui/core';
-
-const result = calculateFormulaBatch(
-  [
-    { name: 'subtotal', expression: 'price * count' },
-    { name: 'tax', expression: 'subtotal * taxRate' },
-    { name: 'total', expression: 'subtotal + tax' },
-  ],
-  {
-    price: 100,
-    count: 2,
-    taxRate: 0.06,
-  },
-);
-
-result.values.total;
-// 212
-```
-
-## Schema Generation
-
-```ts
-import { createFormulaSchema } from 'katex-ui/schema';
-
-const schema = createFormulaSchema({
-  expression: 'amount * (1 + taxRate)',
-  fields: [
-    { name: 'amount', label: 'Amount', defaultValue: 1000, min: 0 },
-    { name: 'taxRate', label: 'Tax rate', defaultValue: 0.06, min: 0, max: 1 },
-  ],
-  result: {
-    label: 'Total',
-    precision: 12,
-  },
-});
-```
-
-## LaTeX Parser
-
-```ts
-import {
-  calculateLatexFormula,
-  createLatexFormulaCalculator,
-  createLatexFormulaCalculatorConfig,
-  createLatexFormulaSchema,
-  latexToExpression,
-} from 'katex-ui/parser';
-
-latexToExpression('\\frac{price \\times count}{discount}');
-// '((price * count) / (discount))'
-
-calculateLatexFormula('\\frac{price \\times count}{discount}', {
-  price: 100,
-  count: 2,
-  discount: 4,
-});
-// { value: 50, errors: [] }
-
-const schema = createLatexFormulaSchema({
+const calculator = createLatexFormulaCalculator({
   source: '\\frac{price \\times count}{discount}',
   fields: [
     { name: 'price', label: 'Price', defaultValue: 100 },
     { name: 'count', label: 'Count', defaultValue: 2 },
     { name: 'discount', label: 'Discount', defaultValue: 4 },
   ],
-});
-
-const calculator = createLatexFormulaCalculator({
-  source: '\\frac{price \\times count}{discount}',
+  result: {
+    label: 'Total',
+    precision: 12,
+  },
 });
 
 calculator.config;
+calculator.schema;
 calculator.calculate({ price: 100, count: 2, discount: 4 });
 // { value: 50, errors: [] }
-
-createLatexFormulaCalculatorConfig({
-  source: '\\frac{price \\times count}{discount}',
-});
 ```
 
-The parser is a focused conversion layer for common calculation formulas. It supports fractions, `\dfrac`/`\tfrac` aliases, square roots, multiplication/division commands, braced powers, simple variable subscripts, `\left...\right`, and common function commands such as `\min`, `\max`, `\round`, `\sin`, `\cos`, `\tan`, `\log`, `\ln`, `\exp`, and `\abs`. It is not a full LaTeX engine, and unsupported commands return parser errors.
+## API Surface
 
-## Result Formatting
+- `katex-ui/core` - `calculateFormula`, `createFormulaRunner`, `calculateFormulaBatch`, `formatFormulaValue`.
+- `katex-ui/parser` - `latexToExpression`, `parseLatexFormula`, `createLatexFormulaCalculator`.
+- `katex-ui/schema` - `createFormulaSchema`, `createFormulaCalculatorConfig`, `mergeFormulaFields`.
 
-```ts
-import { formatFormulaValue } from 'katex-ui/core';
+## Quality
 
-formatFormulaValue(237.60000000000002, { precision: 12 });
-// '237.6'
-```
-
-## Use With React
-
-Install `katex-ui-react` if you want to render `FormulaSchema` with React and pdyform.
-
-```bash
-pnpm add katex-ui-react pdyform-core pdyform-react react react-dom
-```
+- Unit tests: 46 core/parser/schema tests.
+- Coverage: 90.37% statements, 83.55% branches, 96% functions.
+- Build: `tsup` ESM + `.d.ts`.
+- Runtime dependencies: `expr-eval` only.

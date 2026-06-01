@@ -1,27 +1,51 @@
 # katex-ui-react
 
-React renderer for `katex-ui` formula schemas, powered by `pdyform-react`.
+[![npm](https://img.shields.io/npm/v/katex-ui-react?label=npm)](https://www.npmjs.com/package/katex-ui-react)
+[![demo](https://img.shields.io/badge/demo-GitHub%20Pages-2f6fed)](https://laochen1994.github.io/katex-ui/)
+[![React](https://img.shields.io/badge/React-18%20%7C%2019-61dafb)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-ready-3178c6)](https://www.typescriptlang.org/)
+[![coverage](https://img.shields.io/badge/coverage-93.18%25-7c3aed)](#quality)
+[![license](https://img.shields.io/badge/license-MIT-68a063)](https://github.com/LaoChen1994/katex-ui)
 
-Use this package when you want to turn a formula into a live React form with real-time calculation results.
+React renderer for formula-powered calculators built with `katex-ui`, powered by `pdyform-react`.
 
-[Documentation](https://laochen1994.github.io/katex-ui/) · [GitHub](https://github.com/LaoChen1994/katex-ui)
+Use it when you want to turn a generated `FormulaSchema` into a production React form with live calculation output, typed callbacks, custom fields, and a stable schema boundary.
+
+## Install
 
 ```bash
 pnpm add katex-ui katex-ui-react pdyform-core pdyform-react react react-dom
 ```
 
+## Repository
+
+[github.com/LaoChen1994/katex-ui](https://github.com/LaoChen1994/katex-ui)
+
+## Homepage
+
+[laochen1994.github.io/katex-ui/](https://laochen1994.github.io/katex-ui/)
+
+## Highlights
+
+- **React adapter** - renders `FormulaSchema` through `pdyform-react`.
+- **Live calculation** - emits values and results as users type.
+- **Custom field system** - forwards `componentMap` into pdyform.
+- **Custom result rendering** - format the result bar with product-specific UI.
+- **Inspectable schema** - expose the generated pdyform schema through `onPdyformSchema`.
+- **Framework boundary kept clean** - React stays out of `katex-ui` core.
+
 ## Quick Start
 
 ```tsx
-import { createFormulaSchema } from 'katex-ui/schema';
+import { createLatexFormulaCalculator } from 'katex-ui/parser';
 import { FormulaForm } from 'katex-ui-react';
 
-const schema = createFormulaSchema({
-  expression: 'price * count * discount',
+const calculator = createLatexFormulaCalculator({
+  source: '\\frac{price \\times count}{discount}',
   fields: [
-    { name: 'price', label: 'Price', defaultValue: 99, min: 0, step: 0.01 },
-    { name: 'count', label: 'Count', defaultValue: 2, min: 1 },
-    { name: 'discount', label: 'Discount', defaultValue: 0.8, min: 0, max: 1 },
+    { name: 'price', label: 'Price', defaultValue: 100 },
+    { name: 'count', label: 'Count', defaultValue: 2 },
+    { name: 'discount', label: 'Discount', defaultValue: 4 },
   ],
   result: {
     label: 'Total',
@@ -29,30 +53,21 @@ const schema = createFormulaSchema({
   },
 });
 
-export const App = () => <FormulaForm schema={schema} showResult />;
+export const App = () => (
+  <FormulaForm
+    schema={calculator.schema}
+    showResult
+    onValuesChange={(values) => console.log(values)}
+    onResult={(result) => console.log(result)}
+  />
+);
 ```
-
-## Listen to Values and Results
-
-```tsx
-<FormulaForm
-  schema={schema}
-  onValuesChange={(values) => {
-    console.log(values);
-  }}
-  onResult={(result) => {
-    console.log(result.value, result.errors);
-  }}
-/>
-```
-
-`onChange` is still supported as an alias for value changes.
 
 ## Custom Result Rendering
 
 ```tsx
 <FormulaForm
-  schema={schema}
+  schema={calculator.schema}
   showResult
   resultClassName="result"
   formatResult={(result) =>
@@ -61,30 +76,9 @@ export const App = () => <FormulaForm schema={schema} showResult />;
 />
 ```
 
-## Inspect pdyform Schema
+## Quality
 
-```tsx
-<FormulaForm
-  schema={schema}
-  onPdyformSchema={(pdyformSchema) => {
-    console.log(pdyformSchema);
-  }}
-/>
-```
-
-## Custom Field Components
-
-`katex-ui-react` forwards `componentMap` to `pdyform-react`.
-
-```tsx
-<FormulaForm
-  schema={schema}
-  componentMap={{
-    text: MyTextField,
-  }}
-/>
-```
-
-## Package Boundary
-
-`katex-ui-react` depends on `katex-ui`, but React and pdyform are peer dependencies. That keeps `katex-ui` clean for non-React users while letting React apps opt into the renderer they need.
+- Unit tests: schema adapter and React DOM behavior tests.
+- Coverage: 93.18% statements, 53.65% branches, 66.66% functions.
+- Build: `tsup` ESM + `.d.ts`.
+- Runtime peers: `react`, `react-dom`, `pdyform-core`, `pdyform-react`.

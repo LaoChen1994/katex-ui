@@ -1,11 +1,21 @@
-# Vue Adapter Plan
+# Vue API
 
-Vue support should stay as a renderer adapter on top of `katex-ui`, not as logic inside the core package.
+`katex-ui-vue` renders `FormulaSchema` with native Vue 3 controls.
 
-The core contract already needed by a Vue renderer is:
+It does not reimplement parsing, validation, result formatting, or calculation. Those stay in `katex-ui/core`, `katex-ui/parser`, and `katex-ui/schema`.
+
+## Install
+
+```bash
+pnpm add katex-ui katex-ui-vue vue
+```
+
+## `FormulaForm`
 
 ```ts
+import { createApp, h } from 'vue';
 import { createLatexFormulaCalculator } from 'katex-ui/parser';
+import { FormulaForm } from 'katex-ui-vue';
 
 const calculator = createLatexFormulaCalculator({
   source: '\\frac{price \\times count}{discount}',
@@ -19,20 +29,33 @@ const calculator = createLatexFormulaCalculator({
   },
 });
 
-calculator.schema;
-calculator.calculate({ price: 100, count: 2, discount: 4 });
+createApp({
+  render: () =>
+    h(FormulaForm, {
+      schema: calculator.schema,
+      showResult: true,
+      onValuesChange: (values) => console.log(values),
+      onResult: (result) => console.log(result),
+    }),
+}).mount('#app');
 ```
 
-A future `katex-ui-vue` package should provide a small renderer around this contract:
+## Props
 
 ```ts
-type VueFormulaFormProps = {
+type FormulaFormProps = {
   schema: FormulaSchema;
+  className?: string;
+  formatResult?: (result: FormulaCalculationResult) => VNodeChild;
   initialValues?: FormulaValues;
+  resultClassName?: string;
+  resultLabel?: string;
   showResult?: boolean;
-  onResult?: (result: FormulaCalculationResult) => void;
-  onValuesChange?: (values: FormulaValues) => void;
 };
 ```
 
-It should not reimplement parsing, validation, result formatting, or batch calculation. Those remain in `katex-ui/core`, `katex-ui/parser`, and `katex-ui/schema`.
+## Emits
+
+- `change(values)`
+- `valuesChange(values)`
+- `result(result)`
