@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { createFormulaSchema, normalizeFormulaSchema } from './index.js';
+import {
+  createFormulaCalculatorConfig,
+  createFormulaSchema,
+  mergeFormulaFields,
+  normalizeFormulaSchema,
+} from './index.js';
 
 describe('createFormulaSchema', () => {
   it('creates number fields for formula variables', () => {
@@ -199,6 +204,75 @@ describe('createFormulaSchema', () => {
           defaultValue: 12,
         },
       ],
+    });
+  });
+
+  it('merges field metadata into the current formula variable order', () => {
+    expect(
+      mergeFormulaFields('net + tax', [
+        {
+          name: 'tax',
+          label: 'Tax',
+          defaultValue: 12,
+        },
+        {
+          name: 'unused',
+          label: 'Unused',
+          defaultValue: 99,
+        },
+      ]),
+    ).toEqual([
+      {
+        name: 'net',
+        label: 'net',
+        valueType: 'number',
+        required: true,
+      },
+      {
+        name: 'tax',
+        label: 'Tax',
+        valueType: 'number',
+        required: true,
+        defaultValue: 12,
+      },
+    ]);
+  });
+
+  it('creates serializable calculator configs', () => {
+    expect(
+      createFormulaCalculatorConfig({
+        expression: 'price * count',
+        fields: [
+          {
+            name: 'price',
+            label: '单价',
+            defaultValue: 10,
+          },
+        ],
+        result: {
+          label: '总价',
+        },
+      }),
+    ).toEqual({
+      expression: 'price * count',
+      fields: [
+        {
+          name: 'price',
+          label: '单价',
+          valueType: 'number',
+          required: true,
+          defaultValue: 10,
+        },
+        {
+          name: 'count',
+          label: 'count',
+          valueType: 'number',
+          required: true,
+        },
+      ],
+      result: {
+        label: '总价',
+      },
     });
   });
 });

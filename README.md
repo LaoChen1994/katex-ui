@@ -168,7 +168,9 @@ formatFormulaValue(1234.5, {
 
 ```ts
 import {
+  createFormulaCalculatorConfig,
   createFormulaSchema,
+  mergeFormulaFields,
   normalizeFormulaSchema,
 } from 'katex-ui/schema';
 ```
@@ -191,6 +193,8 @@ const schema = createFormulaSchema({
 
 `createFormulaSchema` keeps variable order from the formula, fills missing field metadata, and ignores fields that are not used by the expression.
 
+Use `createFormulaCalculatorConfig` when you need the same normalized shape as a serializable calculator config. Use `mergeFormulaFields` when the expression changes and existing field metadata should be kept for variables that still exist.
+
 ## Parser API
 
 `katex-ui/parser` converts a pragmatic LaTeX subset into the expression syntax used by `katex-ui/core`.
@@ -199,6 +203,7 @@ const schema = createFormulaSchema({
 import {
   calculateLatexFormula,
   createLatexFormulaCalculator,
+  createLatexFormulaCalculatorConfig,
   createLatexFormulaSchema,
   latexToExpression,
   parseLatexFormula,
@@ -238,8 +243,13 @@ const calculator = createLatexFormulaCalculator({
   source: '\\frac{price \\times count}{discount}',
 });
 
+calculator.config;
 calculator.calculate({ price: 100, count: 2, discount: 4 });
 // { value: 50, errors: [] }
+
+createLatexFormulaCalculatorConfig({
+  source: '\\frac{price \\times count}{discount}',
+});
 ```
 
 This is a conversion layer, not a full LaTeX engine. It supports common calculation syntax such as `\frac`, `\dfrac`, `\tfrac`, `\sqrt`, `\times`, `\cdot`, `\div`, `\left...\right`, braced powers, simple variable subscripts, and function commands like `\min`, `\max`, `\round`, `\sin`, `\cos`, `\tan`, `\log`, `\ln`, `\exp`, and `\abs`. Unsupported LaTeX commands return a parse error instead of being treated as variables.

@@ -204,7 +204,12 @@ const App = () => {
           </div>
 
           <div>
-            <h2>katex-ui schema</h2>
+            <h2>计算器配置 JSON</h2>
+            <pre>{JSON.stringify(calculator.config, null, 2)}</pre>
+          </div>
+
+          <div>
+            <h2>渲染 schema</h2>
             <pre>{JSON.stringify(schema, null, 2)}</pre>
           </div>
         </div>

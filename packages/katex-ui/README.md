@@ -94,6 +94,7 @@ const schema = createFormulaSchema({
 import {
   calculateLatexFormula,
   createLatexFormulaCalculator,
+  createLatexFormulaCalculatorConfig,
   createLatexFormulaSchema,
   latexToExpression,
 } from 'katex-ui/parser';
@@ -121,8 +122,13 @@ const calculator = createLatexFormulaCalculator({
   source: '\\frac{price \\times count}{discount}',
 });
 
+calculator.config;
 calculator.calculate({ price: 100, count: 2, discount: 4 });
 // { value: 50, errors: [] }
+
+createLatexFormulaCalculatorConfig({
+  source: '\\frac{price \\times count}{discount}',
+});
 ```
 
 The parser is a focused conversion layer for common calculation formulas. It supports fractions, `\dfrac`/`\tfrac` aliases, square roots, multiplication/division commands, braced powers, simple variable subscripts, `\left...\right`, and common function commands such as `\min`, `\max`, `\round`, `\sin`, `\cos`, `\tan`, `\log`, `\ln`, `\exp`, and `\abs`. It is not a full LaTeX engine, and unsupported commands return parser errors.

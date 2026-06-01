@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   calculateLatexFormula,
   createLatexFormulaCalculator,
+  createLatexFormulaCalculatorConfig,
   createLatexFormulaSchema,
   latexToExpression,
   parseLatexFormula,
@@ -230,6 +231,14 @@ describe('latex parser utilities', () => {
       'count',
       'discount',
     ]);
+    expect(calculator.config).toEqual({
+      source: '\\frac{price \\times count}{discount}',
+      expression: '((price * count) / (discount))',
+      fields: calculator.schema.fields,
+      result: {
+        label: '结果',
+      },
+    });
     expect(
       calculator.calculate({
         price: 100,
@@ -239,6 +248,49 @@ describe('latex parser utilities', () => {
     ).toEqual({
       value: 50,
       errors: [],
+    });
+  });
+
+  it('creates serializable latex calculator configs', () => {
+    expect(
+      createLatexFormulaCalculatorConfig({
+        source: '\\frac{price \\times count}{discount}',
+        fields: [
+          { name: 'price', label: '单价', defaultValue: 100 },
+          { name: 'count', label: '数量', defaultValue: 2 },
+        ],
+        result: {
+          label: '结果',
+        },
+      }),
+    ).toEqual({
+      source: '\\frac{price \\times count}{discount}',
+      expression: '((price * count) / (discount))',
+      fields: [
+        {
+          name: 'price',
+          label: '单价',
+          valueType: 'number',
+          required: true,
+          defaultValue: 100,
+        },
+        {
+          name: 'count',
+          label: '数量',
+          valueType: 'number',
+          required: true,
+          defaultValue: 2,
+        },
+        {
+          name: 'discount',
+          label: 'discount',
+          valueType: 'number',
+          required: true,
+        },
+      ],
+      result: {
+        label: '结果',
+      },
     });
   });
 
