@@ -12,8 +12,8 @@ pnpm add katex-ui katex-ui-vue vue
 
 ## `FormulaForm`
 
-```ts
-import { createApp, h } from 'vue';
+```vue
+<script setup lang="ts">
 import { createLatexFormulaCalculator } from 'katex-ui/parser';
 import { FormulaForm } from 'katex-ui-vue';
 
@@ -28,16 +28,16 @@ const calculator = createLatexFormulaCalculator({
     label: '结果',
   },
 });
+</script>
 
-createApp({
-  render: () =>
-    h(FormulaForm, {
-      schema: calculator.schema,
-      showResult: true,
-      onValuesChange: (values) => console.log(values),
-      onResult: (result) => console.log(result),
-    }),
-}).mount('#app');
+<template>
+  <FormulaForm
+    :schema="calculator.schema"
+    show-result
+    @result="(result) => console.log(result)"
+    @values-change="(values) => console.log(values)"
+  />
+</template>
 ```
 
 ## Props
@@ -46,7 +46,7 @@ createApp({
 type FormulaFormProps = {
   schema: FormulaSchema;
   className?: string;
-  formatResult?: (result: FormulaCalculationResult) => VNodeChild;
+  formatResult?: (result: FormulaCalculationResult) => number | string;
   initialValues?: FormulaValues;
   resultClassName?: string;
   resultLabel?: string;

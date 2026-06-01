@@ -13,10 +13,10 @@
     }
   },
   "scripts": {
-    "build": "tsup",
+    "build": "vite build && vue-tsc -p tsconfig.build.json",
     "lint": "eslint .",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
     "katex-ui": "workspace:*"
@@ -25,7 +25,10 @@
     "vue": "^3.5.0"
   },
   "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.4",
     "happy-dom": "^20.9.0",
-    "vue": "^3.5.35"
+    "vite": "^6.0.7",
+    "vue": "^3.5.35",
+    "vue-tsc": "^2.2.12"
   }
 }

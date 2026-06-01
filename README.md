@@ -90,18 +90,22 @@ export const App = () => (
 
 ## Vue Usage
 
-```ts
-import { createApp, h } from 'vue';
+```vue
+<script setup lang="ts">
 import { createLatexFormulaCalculator } from 'katex-ui/parser';
 import { FormulaForm } from 'katex-ui-vue';
 
 const calculator = createLatexFormulaCalculator({
   source: '\\frac{price \\times count}{discount}',
 });
+</script>
 
-createApp({
-  render: () => h(FormulaForm, { schema: calculator.schema, showResult: true }),
-}).mount('#app');
+<template>
+  <FormulaForm
+    :schema="calculator.schema"
+    show-result
+  />
+</template>
 ```
 
 ## Quality

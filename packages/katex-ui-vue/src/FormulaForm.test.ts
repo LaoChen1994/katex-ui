@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { createApp, nextTick } from 'vue';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { FormulaForm } from './FormulaForm.js';
+import FormulaForm from './FormulaForm.vue';
 
 afterEach(() => {
   document.body.innerHTML = '';

@@ -1,6 +1,6 @@
-export { FormulaForm } from './FormulaForm.js';
+export { default as FormulaForm } from './FormulaForm.vue';
 export type {
   FormulaFormProps,
   FormulaFormResult,
   FormulaFormValues,
-} from './FormulaForm.js';
+} from './types.js';
