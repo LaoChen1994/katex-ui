@@ -1,5 +1,11 @@
 # katex-ui
 
+## 0.6.0
+
+### Minor Changes
+
+- c45ed3e: Add serializable calculator config helpers for formula and LaTeX workflows, plus a field merge utility for preserving field metadata across formula changes.
+
 ## 0.5.0
 
 ### Minor Changes
