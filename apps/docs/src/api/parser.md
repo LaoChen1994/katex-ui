@@ -80,16 +80,31 @@ createLatexFormulaSchema({
 
 ## `createLatexFormulaCalculator(options)`
 
-返回解析结果、schema 和可复用的 `calculate(values)`。
+返回解析结果、可序列化配置、schema 和可复用的 `calculate(values)`。
 
 ```ts
 const calculator = createLatexFormulaCalculator({
   source: '\\frac{price \\times count}{discount}',
 });
 
+calculator.config;
 calculator.expression;
 // '((price * count) / (discount))'
 
 calculator.calculate({ price: 100, count: 2, discount: 4 });
 // { value: 50, errors: [] }
+```
+
+## `createLatexFormulaCalculatorConfig(options)`
+
+只生成可序列化配置，不绑定计算 runner。
+
+```ts
+createLatexFormulaCalculatorConfig({
+  source: '\\frac{price \\times count}{discount}',
+  fields: [
+    { name: 'price', label: '单价', defaultValue: 100 },
+    { name: 'count', label: '数量', defaultValue: 2 },
+  ],
+});
 ```

@@ -38,6 +38,8 @@ export type FormulaSchema = {
   result?: FormulaResultSchema;
 };
 
+export type FormulaCalculatorConfig = FormulaSchema;
+
 export type CreateFormulaSchemaOptions = {
   expression: string;
   fields?: FormulaField[];
@@ -66,20 +68,29 @@ export const createFormulaSchema = (
   });
 };
 
-export const normalizeFormulaSchema = (schema: FormulaSchema): FormulaSchema => {
-  const configuredFields = new Map(
-    schema.fields.map((field) => [field.name, field]),
-  );
+export const mergeFormulaFields = (
+  expression: string,
+  fields: FormulaField[] = [],
+): FormulaField[] => {
+  const configuredFields = new Map(fields.map((field) => [field.name, field]));
 
+  return extractVariables(expression).map((name) => ({
+    name,
+    label: name,
+    valueType: 'number',
+    required: true,
+    ...configuredFields.get(name),
+  }));
+};
+
+export const normalizeFormulaSchema = (schema: FormulaSchema): FormulaSchema => {
   return {
     expression: schema.expression,
-    fields: extractVariables(schema.expression).map((name) => ({
-      name,
-      label: name,
-      valueType: 'number',
-      required: true,
-      ...configuredFields.get(name),
-    })),
+    fields: mergeFormulaFields(schema.expression, schema.fields),
     ...(schema.result ? { result: schema.result } : {}),
   };
 };
+
+export const createFormulaCalculatorConfig = (
+  options: CreateFormulaSchemaOptions,
+): FormulaCalculatorConfig => createFormulaSchema(options);

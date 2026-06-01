@@ -24,6 +24,7 @@ export default defineConfig({
           { text: 'Core', link: '/api/core' },
           { text: 'Parser', link: '/api/parser' },
           { text: 'Schema', link: '/api/schema' },
+          { text: 'Config', link: '/api/config' },
           { text: 'React', link: '/api/react' },
           { text: 'Vue Plan', link: '/api/vue' },
         ],

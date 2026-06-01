@@ -10,6 +10,7 @@ import type {
 } from '../core/index.js';
 import { createFormulaSchema } from '../schema/index.js';
 import type {
+  FormulaCalculatorConfig,
   FormulaField,
   FormulaResultSchema,
   FormulaSchema,
@@ -39,8 +40,13 @@ export type CreateLatexFormulaSchemaOptions = {
 };
 
 export type LatexFormulaCalculator = ParsedLatexFormula & {
+  config: LatexFormulaCalculatorConfig;
   schema: FormulaSchema;
   calculate: (values: FormulaValues) => FormulaCalculationResult;
+};
+
+export type LatexFormulaCalculatorConfig = FormulaCalculatorConfig & {
+  source: string;
 };
 
 const commandMap: Record<string, string> = {
@@ -399,10 +405,17 @@ export const createLatexFormulaCalculator = (
     fields: options.fields ?? [],
     result: options.result,
   });
+  const config = {
+    source: options.source,
+    expression: schema.expression,
+    fields: schema.fields,
+    ...(schema.result ? { result: schema.result } : {}),
+  };
   const runner = createFormulaRunner(parsed.expression);
 
   return {
     ...parsed,
+    config,
     schema,
     calculate: (values) => {
       if (parsed.errors.length > 0) {
@@ -417,5 +430,23 @@ export const createLatexFormulaCalculator = (
 
       return runner.calculate(values);
     },
+  };
+};
+
+export const createLatexFormulaCalculatorConfig = (
+  options: CreateLatexFormulaSchemaOptions,
+): LatexFormulaCalculatorConfig => {
+  const parsed = parseLatexFormula(options.source);
+  const schema = createFormulaSchema({
+    expression: parsed.expression,
+    fields: options.fields ?? [],
+    result: options.result,
+  });
+
+  return {
+    source: options.source,
+    expression: schema.expression,
+    fields: schema.fields,
+    ...(schema.result ? { result: schema.result } : {}),
   };
 };
