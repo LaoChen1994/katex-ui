@@ -1,5 +1,11 @@
 # katex-ui
 
+## 1.0.0
+
+### Major Changes
+
+- e75d651: Ship the first full Vue adapter, refresh package documentation for the major release, and publish package-level coverage and demo metadata.
+
 ## 0.6.0
 
 ### Minor Changes
