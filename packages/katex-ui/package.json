@@ -1,6 +1,6 @@
 {
   "name": "katex-ui",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Formula calculator engine that turns expressions and pragmatic LaTeX into serializable schemas.",
   "type": "module",
   "license": "MIT",

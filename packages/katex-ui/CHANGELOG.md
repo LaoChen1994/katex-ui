@@ -1,5 +1,11 @@
 # katex-ui
 
+## 1.0.1
+
+### Patch Changes
+
+- 42a6581: Improve package metadata, positioning copy, documentation, and security notes for formula calculator use cases.
+
 ## 1.0.0
 
 ### Major Changes

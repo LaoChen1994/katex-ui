@@ -1,6 +1,6 @@
 {
   "name": "katex-ui-vue",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Vue 3 live formula form renderer for katex-ui calculator schemas.",
   "type": "module",
   "license": "MIT",
