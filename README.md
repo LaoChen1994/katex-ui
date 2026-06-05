@@ -12,6 +12,8 @@ Formula-powered calculator toolkit for products that need user-editable calculat
 
 `katex-ui` converts plain expressions or pragmatic LaTeX into stable calculator config, renders that schema in React or Vue, and recalculates results as users type.
 
+It is not a TeX renderer like `katex`: use it when formulas need to become calculator schemas, live forms, and persisted business rules.
+
 Try the interactive demo: [laochen1994.github.io/katex-ui](https://laochen1994.github.io/katex-ui/).
 
 ## Install
@@ -117,6 +119,12 @@ Coverage was generated with Vitest v8 coverage on this branch:
 | `katex-ui` | 90.37% | 83.55% | 96% |
 | `katex-ui-react` | 93.18% | 53.65% | 66.66% |
 | `katex-ui-vue` | 75.37% | 44.44% | 78.57% |
+
+## Security
+
+`katex-ui` evaluates formulas with `expr-eval`, not `eval` or `Function`. Pass only trusted formula definitions or validate user-authored formulas before saving them. The core runner only forwards number, string, and boolean values into the evaluator.
+
+See [SECURITY.md](./SECURITY.md) for the supported threat model and dependency notes.
 
 ## License
 

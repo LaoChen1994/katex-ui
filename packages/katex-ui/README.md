@@ -10,6 +10,8 @@ Framework-free formula engine and schema toolkit for dynamic calculators.
 
 `katex-ui` owns the durable domain layer: expression validation, LaTeX conversion, variable extraction, serializable calculator config, schema normalization, batch calculation, reusable runners, and display-safe formatting.
 
+It is not a TeX renderer like `katex`: use it when formulas need to become calculator schemas, live forms, and persisted business rules.
+
 ## Install
 
 ```bash

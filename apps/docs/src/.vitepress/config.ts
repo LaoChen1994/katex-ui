@@ -14,6 +14,7 @@ export default defineConfig({
         text: '指南',
         items: [
           { text: '快速开始', link: '/guide/getting-started' },
+          { text: 'LaTeX 支持范围', link: '/guide/latex-support' },
           { text: 'React', link: '/guide/react' },
           { text: '批量公式', link: '/guide/batch' },
         ],

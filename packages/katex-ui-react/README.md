@@ -11,6 +11,8 @@ React renderer for formula-powered calculators built with `katex-ui`, powered by
 
 Use it when you want to turn a generated `FormulaSchema` into a production React form with live calculation output, typed callbacks, custom fields, and a stable schema boundary.
 
+It does not render TeX math. Pair it with `katex-ui/parser` when pragmatic LaTeX needs to become a calculator form.
+
 ## Install
 
 ```bash
