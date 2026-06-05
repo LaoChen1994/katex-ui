@@ -1,8 +1,29 @@
 {
   "name": "katex-ui",
   "version": "1.0.0",
+  "description": "Formula calculator engine that turns expressions and pragmatic LaTeX into serializable schemas.",
   "type": "module",
+  "license": "MIT",
   "sideEffects": false,
+  "keywords": [
+    "formula",
+    "calculator",
+    "dynamic-form",
+    "latex",
+    "expression",
+    "schema",
+    "typescript",
+    "low-code"
+  ],
+  "homepage": "https://laochen1994.github.io/katex-ui/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LaoChen1994/katex-ui.git",
+    "directory": "packages/katex-ui"
+  },
+  "bugs": {
+    "url": "https://github.com/LaoChen1994/katex-ui/issues"
+  },
   "files": [
     "dist"
   ],

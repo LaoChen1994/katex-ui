@@ -11,6 +11,8 @@ Vue renderer for formula-powered calculators built with `katex-ui`.
 
 It turns a framework-neutral `FormulaSchema` into a live Vue form, emits value/result updates, and stays thin: parsing, schema generation, formatting, and calculation remain in `katex-ui`.
 
+It does not render TeX math. Pair it with `katex-ui/parser` when pragmatic LaTeX needs to become a calculator form.
+
 ## Install
 
 ```bash
