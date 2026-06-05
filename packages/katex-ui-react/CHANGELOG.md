@@ -1,5 +1,13 @@
 # katex-ui-react
 
+## 1.0.1
+
+### Patch Changes
+
+- 42a6581: Improve package metadata, positioning copy, documentation, and security notes for formula calculator use cases.
+- Updated dependencies [42a6581]
+  - katex-ui@1.0.1
+
 ## 1.0.0
 
 ### Major Changes
