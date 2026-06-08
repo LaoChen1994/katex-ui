@@ -70,4 +70,4 @@ calculator.calculate({ price: 100, count: 2, discount: 4 });
 - Unit tests: 46 core/parser/schema tests.
 - Coverage: 90.37% statements, 83.55% branches, 96% functions.
 - Build: `tsup` ESM + `.d.ts`.
-- Runtime dependencies: `expr-eval` only.
+- Runtime dependencies: none.

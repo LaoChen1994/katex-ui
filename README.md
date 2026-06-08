@@ -122,7 +122,7 @@ Coverage was generated with Vitest v8 coverage on this branch:
 
 ## Security
 
-`katex-ui` evaluates formulas with `expr-eval`, not `eval` or `Function`. Pass only trusted formula definitions or validate user-authored formulas before saving them. The core runner only forwards number, string, and boolean values into the evaluator.
+`katex-ui` evaluates formulas with a built-in arithmetic evaluator, not `eval`, `Function`, or a general-purpose JavaScript expression runtime. Pass only trusted formula definitions or validate user-authored formulas with `validateFormulaPolicy` before saving them.
 
 See [SECURITY.md](./SECURITY.md) for the supported threat model and dependency notes.
 
