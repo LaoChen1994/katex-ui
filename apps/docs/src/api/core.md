@@ -4,9 +4,30 @@
 
 从公式表达式中提取变量名。
 
+## `extractFunctions(expression)`
+
+从公式表达式中提取函数名。
+
+```ts
+extractFunctions('round(max(price, floor(base * rate)))');
+// ['round', 'max', 'floor']
+```
+
 ## `validateFormula(expression)`
 
 校验公式语法，返回 `{ valid, errors }`。
+
+## `validateFormulaPolicy(expression, policy)`
+
+在语法校验之外，额外限制可用函数、可用变量和表达式长度。
+
+```ts
+validateFormulaPolicy('round(price * count)', {
+  allowedFunctions: ['round'],
+  allowedVariables: ['price', 'count'],
+  maxExpressionLength: 64,
+});
+```
 
 ## `calculateFormula(expression, values)`
 
@@ -59,3 +80,11 @@ calculateFormulaBatch(
   { price: 100, count: 2, taxRate: 0.06 },
 );
 ```
+
+## 支持的表达式范围
+
+core 计算层使用内置有限 evaluator，不执行任意 JavaScript。当前支持：
+
+- 数字、变量、括号、一元 `+` 和 `-`
+- `+`、`-`、`*`、`/`、`%`、`^`
+- `abs`、`ceil`、`cos`、`exp`、`floor`、`log`、`max`、`min`、`round`、`sin`、`sqrt`、`tan`

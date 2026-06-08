@@ -4,7 +4,13 @@
 
 `katex-ui` is designed for product-owned calculator formulas, admin-authored business rules, and persisted calculator schemas. It is not designed to execute arbitrary untrusted JavaScript.
 
-The core package evaluates expressions with `expr-eval`, not `eval` or `Function`. `createFormulaRunner` only forwards number, string, and boolean values into the evaluator.
+The core package evaluates expressions with a built-in arithmetic evaluator, not `eval`, `Function`, or a general-purpose JavaScript expression runtime.
+
+Supported expression features are intentionally limited to:
+
+- numbers, variables, parentheses, unary `+` and `-`
+- `+`, `-`, `*`, `/`, `%`, and `^`
+- built-in functions: `abs`, `ceil`, `cos`, `exp`, `floor`, `log`, `max`, `min`, `round`, `sin`, `sqrt`, and `tan`
 
 ## User-Authored Formulas
 
@@ -14,9 +20,10 @@ Recommended controls:
 
 - Store the original `source`, generated `expression`, normalized `fields`, and result metadata.
 - Review parser errors before publishing a formula.
+- Use `validateFormulaPolicy` to enforce allowed functions, allowed variables, and maximum expression length.
 - Restrict who can create or update formulas in production systems.
 - Treat dependency audit findings in expression parsers as release blockers.
 
 ## Dependency Note
 
-`expr-eval` is currently the only runtime dependency of `katex-ui`. The latest npm version checked for this change is `2.0.2`, which is the version already used by this workspace.
+`katex-ui` does not depend on a third-party expression evaluator at runtime.

@@ -1,5 +1,8 @@
-import { Parser } from 'expr-eval';
-import type { Expression, Values } from 'expr-eval';
+import {
+  evaluateArithmeticExpression,
+  parseArithmeticExpression,
+} from '../engines/index.js';
+import type { ArithmeticExpression } from '../engines/index.js';
 
 export type FormulaValue = number | string | boolean | null | undefined;
 
@@ -8,11 +11,15 @@ export type FormulaValues = Record<string, FormulaValue>;
 export type FormulaErrorCode =
   | 'INVALID_EXPRESSION'
   | 'MISSING_VARIABLE'
-  | 'INVALID_RESULT';
+  | 'INVALID_RESULT'
+  | 'DISALLOWED_FUNCTION'
+  | 'DISALLOWED_VARIABLE'
+  | 'EXPRESSION_TOO_LONG';
 
 export type FormulaError = {
   code: FormulaErrorCode;
   message: string;
+  function?: string;
   variable?: string;
 };
 
@@ -47,6 +54,12 @@ export type FormulaRunner = {
   calculate: (values: FormulaValues) => FormulaCalculationResult;
 };
 
+export type FormulaPolicy = {
+  allowedFunctions?: string[];
+  allowedVariables?: string[];
+  maxExpressionLength?: number;
+};
+
 export type FormulaBatchDefinition = {
   name: string;
   expression: string;
@@ -58,21 +71,33 @@ export type FormulaBatchResult = {
   errors: FormulaError[];
 };
 
-const parser = new Parser();
-
 export const extractVariables = (expression: string): string[] => {
   if (!expression.trim()) {
     return [];
   }
 
   try {
-    return parser.parse(expression).variables();
+    return parseArithmeticExpression(expression).variables;
   } catch {
     return [];
   }
 };
 
-export const validateFormula = (expression: string): FormulaValidationResult => {
+export const extractFunctions = (expression: string): string[] => {
+  if (!expression.trim()) {
+    return [];
+  }
+
+  try {
+    return parseArithmeticExpression(expression).functions;
+  } catch {
+    return [];
+  }
+};
+
+export const validateFormula = (
+  expression: string,
+): FormulaValidationResult => {
   if (!expression.trim()) {
     return {
       valid: false,
@@ -86,7 +111,7 @@ export const validateFormula = (expression: string): FormulaValidationResult => 
   }
 
   try {
-    parser.parse(expression);
+    parseArithmeticExpression(expression);
     return {
       valid: true,
       errors: [],
@@ -107,6 +132,63 @@ export const validateFormula = (expression: string): FormulaValidationResult => 
   }
 };
 
+export const validateFormulaPolicy = (
+  expression: string,
+  policy: FormulaPolicy,
+): FormulaValidationResult => {
+  const errors: FormulaError[] = [];
+
+  if (
+    policy.maxExpressionLength !== undefined &&
+    expression.length > policy.maxExpressionLength
+  ) {
+    errors.push({
+      code: 'EXPRESSION_TOO_LONG',
+      message: `Formula expression must be at most ${policy.maxExpressionLength} characters.`,
+    });
+  }
+
+  const validation = validateFormula(expression);
+
+  if (!validation.valid) {
+    errors.push(...validation.errors);
+
+    return {
+      valid: false,
+      errors,
+    };
+  }
+
+  if (policy.allowedFunctions) {
+    for (const functionName of extractFunctions(expression)) {
+      if (!policy.allowedFunctions.includes(functionName)) {
+        errors.push({
+          code: 'DISALLOWED_FUNCTION',
+          function: functionName,
+          message: `Function "${functionName}" is not allowed.`,
+        });
+      }
+    }
+  }
+
+  if (policy.allowedVariables) {
+    for (const variable of extractVariables(expression)) {
+      if (!policy.allowedVariables.includes(variable)) {
+        errors.push({
+          code: 'DISALLOWED_VARIABLE',
+          message: `Variable "${variable}" is not allowed.`,
+          variable,
+        });
+      }
+    }
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+};
+
 export const formatFormulaValue = (
   value: number | null | undefined,
   options: FormulaFormatOptions = {},
@@ -118,7 +200,9 @@ export const formatFormulaValue = (
   }
 
   const normalizedValue =
-    options.precision === undefined ? value : Number(value.toPrecision(options.precision));
+    options.precision === undefined
+      ? value
+      : Number(value.toPrecision(options.precision));
 
   if (
     options.locale ||
@@ -146,14 +230,14 @@ export const getFormulaSummary = (expression: string): FormulaSummary => {
 };
 
 export const createFormulaRunner = (expression: string): FormulaRunner => {
-  let parsedExpression: Expression | null = null;
+  let parsedExpression: ArithmeticExpression | null = null;
   const validation = validateFormula(expression);
 
   if (validation.valid) {
-    parsedExpression = parser.parse(expression);
+    parsedExpression = parseArithmeticExpression(expression);
   }
 
-  const variables = validation.valid ? parsedExpression?.variables() ?? [] : [];
+  const variables = validation.valid ? (parsedExpression?.variables ?? []) : [];
 
   return {
     expression,
@@ -187,21 +271,7 @@ export const createFormulaRunner = (expression: string): FormulaRunner => {
       }
 
       try {
-        const evaluationValues: Values = {};
-
-        for (const variable of variables) {
-          const value = values[variable];
-
-          if (typeof value === 'number' || typeof value === 'string') {
-            evaluationValues[variable] = value;
-          }
-
-          if (typeof value === 'boolean') {
-            evaluationValues[variable] = value ? 1 : 0;
-          }
-        }
-
-        const result = parsedExpression.evaluate(evaluationValues);
+        const result = evaluateArithmeticExpression(parsedExpression, values);
 
         if (typeof result !== 'number' || !Number.isFinite(result)) {
           return {

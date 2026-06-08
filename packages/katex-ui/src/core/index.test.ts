@@ -3,10 +3,12 @@ import {
   calculateFormula,
   calculateFormulaBatch,
   createFormulaRunner,
+  extractFunctions,
   extractVariables,
   formatFormulaValue,
   getFormulaSummary,
   validateFormula,
+  validateFormulaPolicy,
 } from './index.js';
 
 describe('core formula utilities', () => {
@@ -21,6 +23,14 @@ describe('core formula utilities', () => {
   it('returns no variables for empty or invalid expressions', () => {
     expect(extractVariables('')).toEqual([]);
     expect(extractVariables('price *')).toEqual([]);
+  });
+
+  it('extracts function names from a formula', () => {
+    expect(extractFunctions('round(max(price, floor(base * rate)))')).toEqual([
+      'round',
+      'max',
+      'floor',
+    ]);
   });
 
   it('validates invalid expressions', () => {
@@ -60,6 +70,18 @@ describe('core formula utilities', () => {
       }),
     ).toEqual({
       value: 12,
+      errors: [],
+    });
+  });
+
+  it('calculates formulas with numeric strings', () => {
+    expect(
+      calculateFormula('price * count', {
+        price: '10',
+        count: '3',
+      }),
+    ).toEqual({
+      value: 30,
       errors: [],
     });
   });
@@ -105,6 +127,20 @@ describe('core formula utilities', () => {
     expect(result.errors[0]?.code).toBe('INVALID_EXPRESSION');
   });
 
+  it('returns invalid result errors for non-numeric strings', () => {
+    expect(
+      calculateFormula('price * count', { price: 'abc', count: 2 }),
+    ).toEqual({
+      value: null,
+      errors: [
+        {
+          code: 'INVALID_EXPRESSION',
+          message: 'Variable "price" must be numeric.',
+        },
+      ],
+    });
+  });
+
   it('treats unresolved function names as missing variables', () => {
     expect(calculateFormula('unknownFn(price)', { price: 10 })).toEqual({
       value: null,
@@ -113,6 +149,23 @@ describe('core formula utilities', () => {
           code: 'MISSING_VARIABLE',
           message: 'Variable "unknownFn" is required.',
           variable: 'unknownFn',
+        },
+      ],
+    });
+  });
+
+  it('does not forward object or function values into calculation', () => {
+    const values = Object.create(null);
+
+    values.price = 10;
+    values.count = () => 2;
+
+    expect(calculateFormula('price * count', values)).toEqual({
+      value: null,
+      errors: [
+        {
+          code: 'INVALID_EXPRESSION',
+          message: 'Variable "count" must be numeric.',
         },
       ],
     });
@@ -132,16 +185,18 @@ describe('core formula utilities', () => {
   });
 
   it('treats empty strings as missing values', () => {
-    expect(calculateFormula('price * count', { price: 10, count: '' })).toEqual({
-      value: null,
-      errors: [
-        {
-          code: 'MISSING_VARIABLE',
-          message: 'Variable "count" is required.',
-          variable: 'count',
-        },
-      ],
-    });
+    expect(calculateFormula('price * count', { price: 10, count: '' })).toEqual(
+      {
+        value: null,
+        errors: [
+          {
+            code: 'MISSING_VARIABLE',
+            message: 'Variable "count" is required.',
+            variable: 'count',
+          },
+        ],
+      },
+    );
   });
 
   it('formats floating point values for display', () => {
@@ -173,7 +228,46 @@ describe('core formula utilities', () => {
       errors: [
         {
           code: 'INVALID_EXPRESSION',
-          message: 'unexpected TEOF: EOF',
+          message: 'Formula expression is invalid.',
+        },
+      ],
+    });
+  });
+
+  it('validates formula policies', () => {
+    expect(
+      validateFormulaPolicy('round(price * count)', {
+        allowedFunctions: ['round'],
+        allowedVariables: ['price', 'count'],
+        maxExpressionLength: 32,
+      }),
+    ).toEqual({
+      valid: true,
+      errors: [],
+    });
+
+    expect(
+      validateFormulaPolicy('sqrt(price * count)', {
+        allowedFunctions: ['round'],
+        allowedVariables: ['price'],
+        maxExpressionLength: 8,
+      }),
+    ).toEqual({
+      valid: false,
+      errors: [
+        {
+          code: 'EXPRESSION_TOO_LONG',
+          message: 'Formula expression must be at most 8 characters.',
+        },
+        {
+          code: 'DISALLOWED_FUNCTION',
+          function: 'sqrt',
+          message: 'Function "sqrt" is not allowed.',
+        },
+        {
+          code: 'DISALLOWED_VARIABLE',
+          message: 'Variable "count" is not allowed.',
+          variable: 'count',
         },
       ],
     });

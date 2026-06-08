@@ -50,9 +50,5 @@
     "lint": "eslint .",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "expr-eval": "^2.0.2"
-  },
-  "devDependencies": {}
+  }
 }
