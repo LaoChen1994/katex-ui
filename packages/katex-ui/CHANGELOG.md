@@ -1,5 +1,11 @@
 # katex-ui
 
+## 2.0.0
+
+### Major Changes
+
+- 75ef54b: Replace the third-party expression evaluator with a built-in limited arithmetic evaluator and add formula policy validation APIs.
+
 ## 1.0.1
 
 ### Patch Changes
